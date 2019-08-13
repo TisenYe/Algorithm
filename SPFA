@@ -1,0 +1,76 @@
+#include<iostream>
+#include<vector>
+#include<stack>
+#include<map>
+#include<cstdio>
+#include<cstring>
+#include<queue>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define rep2(i,start,end) for(int i = start; i < end; i++)
+#define dwn(i,n) for(int i = n; i >= 0; i--)
+#define dwn2(i,start,end) for(int i = start; i >= end; i--)
+#define pll pair<ll,ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll Mode = 1e9 + 7;
+
+ll T,n;
+vector<pair<ll,ll> > G[N];
+ll dis[N];
+ll mark[N];	//标记有无负环 
+ll vis[N];
+ll SPFA(ll s){
+	memset(dis, INF, sizeof(dis));
+	memset(vis, 0, sizeof(vis));
+	memset(mark, 0, sizeof(mark));
+	dis[s] = 0;
+	queue<pll> q;
+	q.push({0,s});
+	vis[s] = 1;
+	mark[s]++;
+	while(!q.empty()){
+		pll p = q.front();
+		q.pop();
+		ll to = p.second;
+		ll cost = p.first;
+		ll len = G[to].size();
+		vis[to] = 0;
+		rep(i,len){
+			pll tmp  = G[to][i];
+//			if(vis[tmp.second]) continue;
+//			vis[tmp.second] = 1;
+			if(dis[tmp.second] > dis[to] + tmp.first){
+				dis[tmp.second] = dis[to] + tmp.first;
+				if(!vis[tmp.second]){
+					q.push({dis[tmp.second], tmp.second});
+					mark[tmp.second]++;
+					vis[tmp.second] = 1;
+				}
+				if(mark[tmp.second] >= n){	//如果不存在负环，最多n-1次可得最短路 
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
+int main(){
+	scanf("%lld%lld",&T,&n);
+	rep(i,T){
+		ll x,y,z;
+		scanf("%lld%lld%lld",&x,&y,&z);
+		G[x].push_back({z,y});
+		G[y].push_back({z,x});
+	} 
+	if(SPFA(1))
+	cout<<dis[n]<<endl;
+	else
+	cout<<"Nosolution"<<endl;
+	return 0;
+}
