@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(ll i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 2e6 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+ll n;
+ll bit_tree[N];
+ll bit_tree2[N];
+ll lowbit(ll a){
+	return a&-a;
+}
+ll add(ll a, ll b){
+	ll t = a;
+	for(ll i = a; i <= n; i += lowbit(i)){
+		bit_tree[i] += b;
+		bit_tree2[i] += b*t;
+	}
+}
+
+ll pre_sum(ll a){
+	ll sum1 = 0, sum2 = 0;
+	for(ll i = a; i > 0; i -= lowbit(i)){
+		sum1 += bit_tree[i];
+		sum2 += bit_tree2[i];
+	}
+	sum1 *= (a+1);
+	return sum1 - sum2;
+}
+
+ll range_add(ll l, ll r, ll v){
+	add(l,v);
+	add(r+1,-v);
+}
+ll range_sum(ll l, ll r){
+	return pre_sum(r) - pre_sum(l-1);
+}
+int main(){
+	ll q;
+	cin>>n>>q;
+	rep2(i,1,n+1){
+		ll x;
+		scanf("%lld",&x);
+		range_add(i,i,x);
+	}
+	while(q--){
+		int cmd;
+		scanf("%d",&cmd);
+		if(cmd == 1){
+			ll x,y,z;
+			scanf("%lld%lld%lld",&x,&y,&z);
+			range_add(x,y,z);
+		}else{
+			ll x,y;
+			scanf("%lld%lld",&x,&y);
+			cout<<range_sum(x,y)<<endl;
+			
+		}
+	}
+	
+
+
+	return 0;
+}
+
