@@ -11,7 +11,7 @@ using namespace std;
 const ll N = 2e6 + 200;
 const ll INF = 0x3f3f3f;
 const ll mode = 1e9 + 7;
-
+//只适合最大值，最小值查询有点毛病
 ll n;
 ll val[N];
 ll mxval[N];
