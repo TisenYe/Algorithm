@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+/*给定一个n个点m条边有向图，每个点有一个权值，求一条路径，使路径经过的点权值之和最大。你只需要求出这个权值和。
+允许多次经过一条边或者一个点，但是，重复经过的点，权值只计算一次。*/
+
+
+ll head[N], ver[N*2], Next[N*2],a[N],tot;
+ll hc[N*2],vc[N*2],nc[N*2],tc;
+ll dfn[N], low[N], n, m, num, top,cnt;
+ll stk[N], ins[N], c[N], bz[N];
+ll f[N];
+
+void add(ll x, ll y){
+	ver[++tot] = y,Next[tot] = head[x],head[x] = tot;
+}
+
+void add_c(ll x, ll y){
+	vc[++tc] = y, nc[tc] = hc[x], hc[x] = tc;
+}
+
+void tarjan(ll x){
+	dfn[x] = low[x] = ++num;
+	stk[++top] = x, ins[x] = 1;
+	for(int i = head[x]; i; i = Next[i]){
+		if(!dfn[ver[i]]){
+			tarjan(ver[i]);
+			low[x] = min(low[x], low[ver[i]]);
+		}else if(ins[ver[i]]){
+			low[x] = min(low[x], dfn[ver[i]]);
+		}
+	}
+	if(dfn[x] == low[x]){
+		cnt++;
+		ll y;
+		do{
+			y = stk[top--], ins[y] = 0;
+			c[y] = cnt, f[cnt] += a[y];
+		}while(x != y);
+	}
+}
+
+void dp(ll x){
+	ll ma = 0;
+	bz[x] = 1;
+	for(int i = hc[x]; i; i = nc[i]){
+		ll y = vc[i];
+		if(!bz[y]) dp(y);
+		ma = max(ma, f[y]);
+	}
+	f[x] += ma;
+}
+
+int main(){
+	ll n,m;
+	cin>>n>>m;
+	rep2(i,1,n+1){
+		scanf("%lld",&a[i]);
+	}
+	rep2(i,1,m+1){
+		ll x,y;
+		scanf("%lld%lld",&x,&y);
+		add(x,y);
+	}
+	rep2(i,1,n+1) if(!dfn[i]) tarjan(i);
+	rep2(x,1,n+1){
+		for(int i = head[x]; i; i = Next[i]){
+			ll y = ver[i];
+			if(c[x] == c[y]) continue;
+			add_c(c[x],c[y]);
+		}
+	}
+	for(int i = 1; i <= n; i++){
+		if(!bz[i]){
+			dp(i);
+			f[0] = max(f[0], f[i]);
+		}
+	}
+	printf("%lld\n",f[0]);
+	return 0;
+}
+
+
+
+
+
+
