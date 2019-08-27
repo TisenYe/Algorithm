@@ -1,95 +1,87 @@
-
-/*
-使用优先队列Dijkstra算法
-复杂度O(ElogE)
-注意对vector<Edge> E[MAXN]进行初始化后加边
-*/
- 
 #include<iostream>
-#include<cstdio>
-#include<vector>
 #include<queue>
-#include<fstream>
-#include<string.h>
+#include<cstring>
+#include<cstdio>
 using namespace std;
- 
-const int INF=0x3f3f3f3f;
-const int MAXN=1000010;
- 
-struct qnode
-{
-    int v;
-    int c;
-    qnode(int _v=0,int _c=0):v(_v),c(_c){}
-    bool operator <(const qnode &r)const
-    {
-        return c>r.c;
-    }
-};
- 
-struct Edge
-{
-    int v,cost;
-    Edge(int _v=0,int _cost=0):v(_v),cost(_cost){}
-};
- 
-vector<Edge> E[MAXN];
-bool vis[MAXN];
-int dist[MAXN];
- 
-void Dijkstra(int n,int start)//点的编号从1开始
-{
-    memset(vis,false,sizeof(vis));
-    for(int i=1;i<=n;i++) dist[i]=INF;
-    priority_queue<qnode> que;
-    while(!que.empty()) que.pop();
-    dist[start]=0;
-    que.push(qnode(start,0));
-    qnode tmp;
-    while(!que.empty())
-    {
-        tmp=que.top();
-        que.pop();
-        int u=tmp.v;
-        if(vis[u]) continue;
-        vis[u]=true;
-        for(int i=0;i<E[u].size();i++)
-        {
-            int v=E[tmp.v][i].v;
-            int cost=E[u][i].cost;
-            if(!vis[v]&&dist[v]>dist[u]+cost)
-            {
-                dist[v]=dist[u]+cost;
-                que.push(qnode(v,dist[v]));
-            }
-        }
-    }
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e6 + 200;
+const ll INF = 2147483647;
+const ll mode = 1e9 + 7;
+
+typedef struct nods{
+	int Next,v,w,u;
+	nods(){
+		Next = v = w = u = 0;
+	}
+}nod;
+nod edge[N];
+int head[N],dis[N], vis[N];
+int tot,n,m,tc;
+
+void add(int u, int v, int w){
+	edge[++tot].u = u;
+	edge[tot].v = v;
+	edge[tot].w = w;
+	edge[tot].Next = head[u];
+	head[u] = tot;
 }
- 
-void addedge(int u,int v,int w)
-{
-    E[u].push_back(Edge(v,w));
+
+void dijikstra(int start){
+	for(int i = 1; i <= n; i++){
+		dis[i] = INF;
+		vis[i] = 0;
+	}
+	dis[start] = 0;
+	priority_queue<pair<ll,ll> > q;
+	q.push({0,start});
+	while(!q.empty()){
+		int x = q.top().second;
+		q.pop();
+		if(vis[x]) continue;
+		vis[x] = 1;
+		for(int i = head[x]; i; i = edge[i].Next){
+			ll y = edge[i].v, z = edge[i].w;
+			if(dis[y] > dis[x] + z){
+				dis[y] = dis[x] + z;
+				q.push({-dis[y],y});
+			}
+		}
+	}
 }
- 
-int main()
-{
-    for(int i=0;i<=MAXN;i++)
-        if(!E[i].empty())
-            E[i].clear();
-    freopen("in.txt","r",stdin);
-    int n;
-    cin>>n;
-    int e;
-    cin>>e;
-    int u,v,w;
-    for(int i=1;i<=e;i++)
-    {
-        cin>>u>>v>>w;
-        addedge(u,v,w);
-    }
-    Dijkstra(n,1);
-    for(int i=1;i<=n;i++)
-        cout<<dist[i]<<" ";
-    cout<<endl;
-    return 0;
+
+
+int main(){
+//	int t;
+//	scanf("%d",&t);
+//	while(t--){
+		tc = tot = 0;
+		memset(head, 0, sizeof(head));
+		ll start;
+		cin>>n>>m>>start;
+		rep(i,m){
+			int u,v,w;
+			scanf("%d%d%d",&u,&v,&w);
+			add(u,v,w);
+		}
+		dijikstra(start);
+		rep2(i,1,n+1){
+			cout<<dis[i]<<" ";
+		}
+//	}
+	
+	
+	return 0;
 }
+
+
+
+
+
+
