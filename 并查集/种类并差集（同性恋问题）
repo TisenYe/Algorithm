@@ -1,0 +1,78 @@
+#include<iostream>
+#include<vector>
+#include<cstdio>
+#include<cmath>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+ll f[N],r[N];
+void init(ll n){
+	rep(i,n+1){
+		f[i] = i;
+		r[i] = 0;
+	}
+}
+
+ll Find(ll x){
+	if(x == f[x]) return x;
+	return f[x] = Find(f[x]);
+}
+
+void Union(ll x, ll y){
+	x = Find(x), y = Find(y);
+	if(x != y){
+		f[x] = y;
+	}
+}
+
+bool same(ll x, ll y){
+	return Find(x) == Find(y);
+}
+
+int main(){
+	int t;
+	scanf("%d",&t);
+	int cas = 1;
+	while(t--){
+		ll n,m;
+		cin>>n>>m;
+		init(2*n+4);	//1~n为一种性别，n+1~2*n为另一种性别 
+		ll ans = 0;
+		int flag = 0;
+		rep(i,m){
+			ll rs,x,y;
+			scanf("%lld%lld",&x,&y);
+			if(same(x,y) || same(x+n,y+n)){
+				flag = 1;
+				continue;
+			}
+			Union(x,y+n); //x,y为不同性别，所以y+n和x肯定同意性别 
+			Union(x+n,y);	//x+n和y为同一性别 
+		}
+		printf("Scenario #%d:\n",cas++);
+		if(flag){
+			printf("Suspicious bugs found!\n");
+		}else{
+			printf("No suspicious bugs found!\n");
+		}
+		cout<<endl;
+	}
+
+	return 0;
+}
+
+
+
+
+
+
