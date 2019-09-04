@@ -1,0 +1,112 @@
+#include<iostream>
+#include<vector>
+#include<cstdio>
+#include<cmath>
+#include<map>
+#include<cstring>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e3 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+typedef struct nods{
+	ll u,v,w;
+	ll next;
+}nod;
+nod edge[N];
+ll head[N],tot;
+ll n;
+
+void add(ll u, ll v){
+	edge[++tot].u = u;
+	edge[tot].v = v;
+	edge[tot].next = head[u];
+	head[u] = tot;
+}
+
+//-----------------tarjan-----------------------//
+ll dfn[N], low[N],stk[N],ins[N],top,cnt,timing;
+ll mark[N];
+void tarjan(ll x){
+	dfn[x] = low[x] = ++timing, ins[x] = 1;
+	stk[++top] = x, ins[x] = 1;
+	for(int i = head[x]; i; i= edge[i].next){
+		if(!dfn[edge[i].v]){
+			tarjan(edge[i].v);
+			low[x] = min(low[x],low[edge[i].v]);
+		}else if(ins[edge[i].v]){
+			low[x] = min(low[x], dfn[edge[i].v]);
+		}
+	}
+	if(dfn[x] == low[x]){
+		++cnt;
+		ll y;
+		do{
+			y = stk[top--],ins[y] = 0;
+			mark[y] = cnt;
+		}while(x!=y);
+	}
+}
+
+void start_tarjan(ll n){
+	top = 0;
+	cnt = 0;
+	timing = 0;
+	memset(dfn,0,sizeof(dfn));
+	memset(low,0,sizeof(low));
+	memset(ins,0,sizeof(ins));
+	memset(mark,0,sizeof(mark));
+	rep2(i,1,n+1){
+		if(!dfn[i]) tarjan(i);
+	}
+}
+//-----------------------------------------------//
+int main(){
+	cin>>n;
+	rep2(i,1,n+1){
+		ll x;
+		while(~scanf("%lld",&x) && x){
+			add(i,x);
+		}
+	}
+	start_tarjan(n);
+	if(cnt == 1){
+		printf("1\n0\n");
+		return 0;
+	}
+
+	ll in[N] = {0},ot[N] = {0};
+	rep2(i,1,n+1){
+		for(int j = head[i]; j; j = edge[j].next){
+			ll v = edge[j].v;
+//			cout<<mark[i]<<" "<<mark[v]<<endl;
+			if(mark[i] != mark[v]){
+				ot[mark[i]]++;
+				in[mark[v]]++;
+			}
+		}
+	}
+//	cout<<cnt<<endl;
+	int flag1 = 0, flag2 = 0;
+	rep2(i,1,cnt+1){
+		if(!in[i]) flag1++;
+		if(!ot[i]) flag2++;
+	}
+	cout<<flag1<<endl;
+	cout<<max(flag1,flag2)<<endl;
+	return 0;
+}
+
+
+
+
+
+
