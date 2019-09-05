@@ -47,7 +47,8 @@ void tarjan(ll x){
 			tarjan(y);
 			low[x] = min(low[x], low[y]);
 			if(low[y] >= dfn[x]){
-				flag++;
+				flag++;		//当x不为根节点时，一个子节点满足：dfn[x]<= low[y], 
+							//当x为根节点时至少需要两个满足式子，则该点为割点。
 				if(x != root || flag > 1) cut[x] = true;
 			}
 		}else low[x] = min(low[x], dfn[y]);
