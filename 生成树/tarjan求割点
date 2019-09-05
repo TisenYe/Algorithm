@@ -1,0 +1,92 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+typedef struct nods{
+	ll u,v,w;
+	ll next;
+}nod;
+nod edge[N];
+ll head[N],tot;
+ll n;
+
+void init(){
+	tot = 0;
+	memset(head,0,sizeof(head));
+}
+
+void add(ll u, ll v, ll w = 1){
+//	cout<<u<<" "<<v<<endl;
+	edge[++tot].u = u;
+	edge[tot].v = v;
+	edge[tot].w = 1;
+	edge[tot].next = head[u];
+	head[u] = tot;
+}
+
+ll dfn[N],low[N];
+bool cut[N];
+ll num,root;
+
+void tarjan(ll x){
+	dfn[x] = low[x] = ++num;
+	int flag = 0;
+	for(int i = head[x]; i; i = edge[i].next){
+		ll y = edge[i].v; 
+		if(!dfn[y]){
+			tarjan(y);
+			low[x] = min(low[x], low[y]);
+			if(low[y] >= dfn[x]){
+				flag++;
+				if(x != root || flag > 1) cut[x] = true;
+			}
+		}else low[x] = min(low[x], dfn[y]);
+	}
+}
+
+void start_tarjan(ll n){
+	memset(dfn, 0, sizeof(dfn));
+	memset(low,0,sizeof(low));
+	memset(cut, 0, sizeof(cut));
+	num = 0;
+	rep2(i,1,n+1){
+		if(!dfn[i]) root = i, tarjan(i);
+	}
+}
+int main(){
+	while(~scanf("%lld",&n) && n){
+		init();
+		ll u,v;
+		char ch;
+		while(~scanf("%lld",&u) && u){
+			while(scanf("%lld%c",&v,&ch)){
+				add(u,v);
+				add(v,u);
+				if(ch == '\n') break;
+			}
+		}
+		start_tarjan(n);
+		ll rst = 0;
+		rep2(i,1,n+1){
+			if(cut[i]) rst++;
+		}
+		cout<<rst<<endl;
+	}
+	return 0;
+}
+
+
+
+
+
+
