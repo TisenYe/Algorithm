@@ -29,7 +29,7 @@ void add(ll u, ll v, ll w = 1){
 //	cout<<u<<" "<<v<<endl;
 	edge[++tot].u = u;
 	edge[tot].v = v;
-	edge[tot].w = 1;
+	edge[tot].w = w;
 	edge[tot].next = head[u];
 	head[u] = tot;
 }
