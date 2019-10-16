@@ -1,0 +1,120 @@
+#include<iostream>
+#include<cstring>
+#include<queue> 
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i < end; i++)
+#define dwn(i,n) for(int i = n; i >= 0; i--)
+#define dwn2(i,start,end) for(ll i = start; i >= end; i--)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mod = 1e9 + 7;
+
+typedef struct nods{
+	int to,w;
+	int next;
+}nod;
+nod edge[N];
+int head[N],tot;
+void init(){
+	memset(head, -1, sizeof(head));
+	tot = 0;
+}
+
+void add(int x, int y, int w){
+	edge[tot].to = y;
+	edge[tot].w = w;
+	edge[tot].next = head[x];
+	head[x] = tot++;
+	edge[tot].to = x;
+	edge[tot].w = 0;
+	edge[tot].next = head[y];
+	head[y] = tot++;
+}
+
+int vis[N];
+int s,t;			//s是源点， t是汇点 
+bool bfs(){
+	memset(vis, 0, sizeof(vis));
+	queue<int> q;
+	q.push(s); vis[0] = 1;
+	while(!q.empty()){
+		int x = q.front();q.pop();
+		for(int i = head[x]; i != -1; i = edge[i].next){
+			int y = edge[i].to;
+			if(edge[i].w && !vis[y]){
+				q.push(y);
+				vis[y] = vis[x]+1;
+				if(y == t) return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int dinic(int x, int flow){
+	if(x == t) return flow;
+	int addflow = 0;
+	for(int i = head[x]; i != -1 && addflow < flow ;  i = edge[i].next){
+		int y = edge[i].to;
+		if(edge[i].w && vis[y] == vis[x] + 1){
+			int tmp = dinic(y, min(flow - addflow, edge[i].w));
+			edge[i].w -= tmp;
+			edge[i^1].w += tmp;
+			addflow += tmp;
+		}
+		
+	}
+	return addflow;
+}
+
+
+int main(){
+	int n,f,d;
+	scanf("%d%d%d",&n,&f,&d); //f是食物，d是饮料 
+	int s1 = n+f+n;				//食物 -> 牛 -> 牛 ->饮料 
+	int s2 = n+f;
+	int s3 = f;
+	s = 0;
+	t = s1+d+1;
+	init();
+	rep2(i,1,f+1){
+		add(s,i,1);
+	}
+	rep2(i,1,n+1){
+		add(i+s3, i+s2, 1);
+	}
+	rep2(i,1,d+1){
+		add(i+s1, t, 1);
+	}
+	rep2(i,1,n+1){
+		scanf("%d%d",&f,&d);
+		int tmp;
+		while(f--){
+			scanf("%d", &tmp);
+			add(tmp, s3+i, 1);
+		}
+		while(d--){
+			scanf("%d",&tmp);
+			add(s2+i, s1+tmp, 1);
+		}
+	}
+	
+	int maxflow = 0;
+	while(bfs()){
+			maxflow += dinic(0, t);
+//			cout<<maxflow<<endl;
+	}
+	cout<<maxflow<<endl;
+	return 0;
+}
+
+
+
+
