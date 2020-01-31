@@ -1,0 +1,107 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i < end; i++)
+#define dwn(i,n) for(int i = n; i >= 0; i--)
+#define dwn2(i,start,end) for(ll i = start; i >= end; i--)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 9999999999;
+const ll mod = 1e9 + 7;
+
+
+int my_lower_bound(int *array, int size, int key)
+{
+    int first = 0, last = size-1;
+    int middle, pos=0;       //需要用pos记录第一个大于等于key的元素位置
+
+    while(first < last)
+    {
+        middle = (first+last)/2;
+        if(array[middle] < key){      //若中位数的值小于key的值，我们要在右边子序列中查找，这时候pos可能是右边子序列的第一个
+            first = middle + 1;
+            pos = first;
+        }
+        else{
+            last = middle;           //若中位数的值大于等于key，我们要在左边子序列查找，但有可能middle处就是最终位置，所以我们不移动last,
+            pos = last;              //而是让first不断逼近last。
+        }
+    }
+    return pos;
+}
+
+//这个算法中，first是最终要返回的位置,STP源码
+int lower_bound(int *array, int size, int key)
+{
+    int first = 0, middle;
+    int half, len;
+    len = size;
+
+    while(len > 0) {
+        half = len >> 1;
+        middle = first + half;
+        if(array[middle] < key) {     
+            first = middle + 1;          
+            len = len-half-1;       //在右边子序列中查找
+        }
+        else
+            len = half;            //在左边子序列（包含middle）中查找
+    }
+    return first;
+}
+
+int my_upper_bound(int *array, int size, int key)
+{
+    int first = 0, last = size-1;
+    int middle, pos = 0;
+
+    while(first < last)
+    {
+        middle = (first+last)/2;
+        if(array[middle] > key){     //当中位数大于key时，last不动，让first不断逼近last
+            last = middle;
+            pos = last;
+        }
+        else{
+            first = middle + 1;     //当中位数小于等于key时，将first递增，并记录新的位置
+            pos = first;
+        }
+    }
+    return pos;
+}
+//STL源码
+int upper_bound(int *array, int size, int key)
+{
+    int first = 0, len = size-1;
+    int half, middle;
+
+    while(len > 0){
+        half = len >> 1;
+        middle = first + half;
+        if(array[middle] > key)     //中位数大于key,在包含last的左半边序列中查找。
+            len = half;
+        else{
+            first = middle + 1;    //中位数小于等于key,在右半边序列中查找。
+            len = len - half - 1;
+        }
+    }
+    return first;
+}
+int main(){
+	int v[7] = {1,2,3,3,4,5,5};
+	ll t = my_lower_bound(v, 7, 3);
+	ll t2 = lower_bound(v, 7, 3);
+	cout<<t<<" "<<v[t]<<endl;
+	cout<<t2<<" "<<v[t2]<<endl;
+	t = my_upper_bound(v, 7, 3);
+	t2 = upper_bound(v, 7, 3);
+	cout<<t<<" "<<v[t]<<endl;
+	cout<<t2<<" "<<v[t2]<<endl;
+	return 0;
+}
+
+
+
