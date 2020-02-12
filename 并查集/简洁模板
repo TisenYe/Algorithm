@@ -6,3 +6,6 @@ void merge(int x, int y ){
     par[x] += par[y];
     par[y] = x;
 }
+int main(){
+    memset(par,-1,sizeof(par));
+}
