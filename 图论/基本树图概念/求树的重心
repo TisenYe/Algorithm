@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>             //O(n)
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9+7;
+const ll N = 1e3 + 200;
+const ll INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+typedef struct nod{
+    int to,nxt,u;
+}nod;
+int tot;
+int head[N], value[N];
+nod edge[N];
+void add(int u, int v){
+    edge[++tot].to = v;
+    edge[tot].u = u;
+    edge[tot].nxt = head[u];
+    head[u] = tot;
+}
+int f[N],num[N];
+void dfs(int u, int fa, int step){    //dfs寻找重心
+    num[u] += value[u];
+    for(int i = head[u]; i; i = edge[i].nxt){
+        if(edge[i].to != fa){
+            dfs(edge[i].to, u, step+1);
+            num[u] += num[edge[i].to];
+        }
+    }
+    f[1] += value[u] * step;
+}
+int rst = INF;
+void dp(int u, int fa){
+    int x = head[u];
+    for(int i = x; i; i = edge[i].nxt){
+        if(edge[i].to != fa){
+            f[edge[i].to] = f[u] + num[1] - 2*num[edge[i].to];
+            dp(edge[i].to, u);
+        }
+    }
+    rst = min(rst, f[u]);
+}
+int main(){
+    int n;
+    cin>>n;
+    rep(i,n){
+        int w,u,v;
+        scanf("%d%d%d",&w,&u,&v);
+        value[i+1] = w;
+        if(u){
+            add(i+1,u);
+            add(u,i+1);
+        }
+        if(v){
+            add(i+1,v);
+            add(v,i+1);
+        }
+    }
+    dfs(1, 0, 0);
+    dp(1, 0);
+    cout<<rst<<endl;
+    return 0;
+}
