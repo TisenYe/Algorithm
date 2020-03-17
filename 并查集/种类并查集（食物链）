@@ -1,0 +1,87 @@
+#include<iostream>
+#include<vector>
+#include<cstdio>
+#include<cmath>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>	//食物链模板题 
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+ll f[N],r[N];
+//用3倍空间，1~n为种类A，n+1~2*n为种类B，2*n+1~3*n为种类C 
+//A吃B，B吃C，C吃A
+void init(ll n){
+	rep(i,n+1){
+		f[i] = i;
+		r[i] = 0;
+	}
+}
+
+ll Find(ll x){
+	if(x == f[x]) return x;
+	return f[x] = Find(f[x]);
+}
+
+void Union(ll x, ll y){
+	x = Find(x), y = Find(y);
+	if(x != y){
+		f[x] = y;
+	}
+}
+
+bool same(ll x, ll y){
+	return Find(x) == Find(y);
+}
+
+int main(){
+	ll n,m;
+	cin>>n>>m;
+	init(3*n+4);
+	ll ans = 0;
+	rep(i,m){
+		ll rs,x,y;
+		scanf("%lld%lld%lld",&rs,&x,&y);
+		if(rs == 2 && x == y){
+			ans++;
+		}else if(x > n || y > n){
+			ans++;
+		}else{
+			if(rs == 1){
+				if(same(x+n,y) || same(x+2*n,y)){
+					ans++;
+					continue;
+				}
+				Union(x,y);			//表示同一种类，x和y的种类相同，所以加的n都相同，在同一个区间 
+				Union(x+n,y+n);
+				Union(x+2*n,y+2*n);
+			}else{
+				if(same(x,y) || same(x+n,y)){
+					ans++;
+					continue;
+				}
+				Union(x,y+n);	//表示x吃y关系，y要比x的区间大n 
+				Union(x+n,y+2*n);
+				Union(x+2*n,y);
+				
+			}
+			
+		}
+	}
+	cout<<ans<<endl;
+
+	return 0;
+}
+
+
+
+
+
+

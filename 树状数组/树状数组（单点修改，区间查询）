@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(ll i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 2e6 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+ll n;
+ll bit_tree[N];
+ll lowbit(ll a){
+	return a&-a;
+}
+ll add(ll a, ll b){
+	for(ll i = a; i <= n; i += lowbit(i)){
+		bit_tree[i] += b;
+	}
+}
+
+ll pre_sum(ll a){
+	ll sum = 0;
+	for(ll i = a; i > 0; i -= lowbit(i)){
+		sum += bit_tree[i];
+	}
+	return sum;
+}
+
+ll area_sum(ll l, ll r){
+	return pre_sum(r) - pre_sum(l-1);
+}
+int main(){
+	ll q;
+	cin>>n>>q;
+	rep2(i,1,n+1){
+		ll x;
+		scanf("%lld",&x);
+		add(i,x);
+	}
+	while(q--){
+		int cmd;
+		scanf("%d",&cmd);
+		if(cmd == 1){
+			ll x,y;
+			scanf("%lld%lld",&x,&y);
+			add(x,y);
+		}else{
+			ll x,y;
+			scanf("%lld%lld",&x,&y);
+			cout<<area_sum(x,y)<<endl;
+			
+		}
+	}
+	
+
+
+	return 0;
+}

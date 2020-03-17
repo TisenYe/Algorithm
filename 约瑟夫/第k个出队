@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+ll cal1(ll n, ll m, ll k) { // k<m O(k)
+	ll p = m % (n - k + 1);
+	if (p == 0) p = n - k + 1;
+	for (ll i = 2; i <= k; i++) {
+		p = (p + m - 1) % (n - k + i) + 1;
+	}
+	return p;
+}
+ll cal2(ll n, ll m, ll k) {//m<k O(m*log(m))
+	if (m == 1) return k;
+	else {
+		ll a = n - k + 1, b = 1;
+		ll c = m % a, x = 0;
+		if (c == 0) c = a;
+		while (b + x <= k) {
+			a += x, b += x, c += m * x;
+			c %= a;
+			if (c == 0) c = a;
+			x = (a - c) / (m - 1) + 1;
+		}
+		c += (k - b) * m;
+		c %= n;
+		if (c == 0) c = n;
+		return c;
+	}
+}
+
+
+
+int main()
+{
+	int T;
+	ll n,m,k;
+	cin>>T;
+	for(ll l = 1;l<=T;l++){
+		scanf("%lld%lld%lld",&n,&k,&m);
+		printf("Case #%d: ",l);
+		if(k<m)
+			printf("%lld\n",cal1(n,m,k));
+		else
+			printf("%lld\n",cal2(n,m,k));
+	}
+	
+	return 0;
+}

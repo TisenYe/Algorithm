@@ -1,0 +1,102 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(ll i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 2e6 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+//只适合最大值，最小值查询有点毛病
+ll n;
+ll val[N];
+ll mxval[N];
+ll mnval[N];
+ll lowbit(ll a){
+    return a&-a;
+}
+
+void init(int p){
+    for(int i = p; i <= n; i += lowbit(i)){
+        mxval[i] = max(mxval[i], val[p]);
+        mnval[i] = min(mnval[i], val[p]);
+    }
+}
+
+ll change_pos_max(ll p, ll a){
+    val[p] = a;
+    for(int i = p; i <= n; i += lowbit(i)){
+        mxval[i] = val[i];
+        for(int j = 1; j < lowbit(i); j <<= 1){
+            mxval[i] = max(mxval[i], mxval[i-j]);
+        }
+    }
+}
+
+ll range_max(ll l, ll r){
+    ll ans = 0;
+    while(l <= r){
+        ans = max(ans, val[r]);
+        r--;
+        for(; r - lowbit(r) >= l; r-= lowbit(r)){
+            ans = max(ans, mxval[r]);
+        }
+    }
+    return ans;
+}
+
+ll change_pos_min(ll p, ll a){
+    val[p] = a;
+    for(int i = p; i <= n; i += lowbit(i)){
+        mnval[i] = val[i];
+        for(int j = 1; j < lowbit(i); j <<= 1){
+            mnval[i] = min(mnval[i], mnval[i-j]);
+        }
+    }
+}
+
+ll range_min(ll l, ll r){
+    ll ans = 0;
+    while(l <= r){
+        ans = min(ans, val[r]);
+        r--;
+        for(; r - lowbit(r) >= l; r-= lowbit(r)){
+            ans = min(ans, mnval[r]);
+        }
+    }
+    return ans;
+}
+
+int main(){
+    ll m;
+    while(cin>>n && n){
+        cin>>m;
+        for(int i = 0; i <= n; i++){
+            mxval[i] = 0;
+            val[i] = 0;
+        }
+        rep2(i,1,n+1){
+            ll x;
+            scanf("%lld",&x);
+            change_pos_max(i,x);
+        }
+    //    cout<<"k"<<endl;
+        while(m--){
+            string s;
+            ll x,y;
+            cin>>s;
+            scanf("%lld%lld", &x, &y);
+            if(s == "Q"){
+                printf("%lld\n",range_max(x,y));
+            }else{
+                change_pos_max(x,y);
+            }
+            
+        }        
+    }
+    return 0;
+}

@@ -1,0 +1,87 @@
+#include<iostream>
+#include<queue>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e6 + 200;
+const ll INF = 2147483647;
+const ll mode = 1e9 + 7;
+
+typedef struct nods{
+	int Next,v,w,u;
+	nods(){
+		Next = v = w = u = 0;
+	}
+}nod;
+nod edge[N];
+int head[N],dis[N], vis[N];
+int tot,n,m,tc;
+
+void add(int u, int v, int w){
+	edge[++tot].u = u;
+	edge[tot].v = v;
+	edge[tot].w = w;
+	edge[tot].Next = head[u];
+	head[u] = tot;
+}
+
+void dijikstra(int start){
+	for(int i = 1; i <= n; i++){
+		dis[i] = INF;
+		vis[i] = 0;
+	}
+	dis[start] = 0;
+	priority_queue<pair<ll,ll> > q;
+	q.push({0,start});
+	while(!q.empty()){
+		int x = q.top().second;
+		q.pop();
+		if(vis[x]) continue;
+		vis[x] = 1;
+		for(int i = head[x]; i; i = edge[i].Next){
+			ll y = edge[i].v, z = edge[i].w;
+			if(dis[y] > dis[x] + z){
+				dis[y] = dis[x] + z;
+				q.push({-dis[y],y});
+			}
+		}
+	}
+}
+
+
+int main(){
+//	int t;
+//	scanf("%d",&t);
+//	while(t--){
+		tc = tot = 0;
+		memset(head, 0, sizeof(head));
+		ll start;
+		cin>>n>>m>>start;
+		rep(i,m){
+			int u,v,w;
+			scanf("%d%d%d",&u,&v,&w);
+			add(u,v,w);
+		}
+		dijikstra(start);
+		rep2(i,1,n+1){
+			cout<<dis[i]<<" ";
+		}
+//	}
+	
+	
+	return 0;
+}
+
+
+
+
+
+

@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+#include<string>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i < end; i++)
+#define dwn(i,n) for(int i = n; i >= 0; i--)
+#define dwn2(i,start,end) for(ll i = start; i >= end; i--)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e6 + 200;
+const ll INF = 9999999999;
+const ll mod = 1e9 + 7;
+
+
+ll a[N];
+void qsort(int l, int r){
+	ll mid = a[(l+r)/2];
+	int i = l, j = r;
+	while(i <= j){
+		while(a[i] < mid) i++;
+		while(a[j] > mid) j--;
+		if(i <= j){
+			swap(a[i],a[j]);
+			i++,j--;
+		}
+	}
+	if(l < j) qsort(l, j);
+	if(i < r) qsort(i, r);
+}
+
+
+int main(){
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	
+	int n;
+	cin>>n;
+	rep(i,n){
+		cin>>a[i];
+	}
+	qsort(0,n-1);
+	rep(i,n){
+		if(i) cout<<" ";
+		cout<<a[i];
+	}
+	return 0;
+}
+
+
+

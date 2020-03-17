@@ -1,0 +1,59 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
+#include <string>
+using namespace std;
+
+const int maxn=505;
+const int INF=1e9;
+int mp[maxn][maxn];
+int vis[maxn];
+int dis[maxn],dot[maxn];
+int N;
+int stoer_wagner(int now){
+    int ret=INF;
+    for(int i=0;i<now;i++) dot[i]=i;
+    while(now>1){//重复合并n-1个点
+        int pre=0;
+        for(int i=0;i<=N;i++) vis[i]=dis[i]=0;
+        for(int i=1;i<now;i++){//向集合A中添加元素
+            int k= -1;
+            for(int j=1;j<now;j++){ //修改跨界边权
+                if(vis[dot[j]]) continue;
+                dis[dot[j]]+=mp[dot[pre]][dot[j]];
+                if(k==-1||dis[dot[j]]>dis[dot[k]]) k=j;//找到最大边权点
+            }
+            vis[dot[k]]=true;
+            if(i==now-1){//只剩两个的时候 合并点
+                int s=dot[pre],t=dot[k];
+                if(ret>dis[t]) ret=dis[t];
+                for(int j=0;j<now;j++){
+                    mp[s][dot[j]]+=mp[t][dot[j]];
+                    mp[dot[j]][s]+=mp[t][dot[j]];
+                }
+                dot[k]=dot[--now];
+            }
+            pre=k;
+        }
+    }
+    return ret;
+}
+int main(){
+    int n,m;
+    while(~scanf("%d%d",&n,&m)){
+        N=n;
+        for(int i=0;i<=n;i++)
+            for(int j=0;j<=n;j++)
+                mp[i][j]=0;
+        for(int i=1;i<=m;i++){
+            int u,v,w;
+            scanf("%d%d%d",&u,&v,&w);
+            mp[u][v]+=w;
+            mp[v][u]+=w;
+        }
+        printf("%d\n",stoer_wagner(n));
+    }
+    return 0;
+}

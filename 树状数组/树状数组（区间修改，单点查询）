@@ -1,0 +1,76 @@
+#include<iostream>
+#include<vector>
+#include<stack>
+#include<map>
+#include<cstdio>
+#include<cstring>
+#include<queue>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i < end; i++)
+#define dwn(i,n) for(int i = n; i >= 0; i--)
+#define dwn2(i,start,end) for(ll i = start; i >= end; i--)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 6e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll Mode = 1e9 + 7;
+
+//区间修改，单点查询//
+//单点修改，区间查询只需要直接使用add和are_sum就可以//
+ll bit_tree[N],n,m;
+
+ll lowbit(ll a){
+	return a&-a;
+}
+
+void add(ll a, ll b){
+	for(int i = a; i <= n; i+= lowbit(i)){
+		bit_tree[i] += b;
+	}
+}
+
+void add_area(ll l, ll r, ll v){
+	add(l, v);
+	add(r+1, -v);
+}
+
+ll pre_sum(ll a){
+	ll sum = 0;
+	for(int i = a; i > 0; i-= lowbit(i)){
+		sum += bit_tree[i];
+	}
+	return sum;
+}
+
+ll area_sum(ll l, ll r){
+	return pre_sum(r) - pre_sum(l-1);
+}
+
+int main(){
+	ll m;
+	scanf("%lld%lld",&n,&m);
+	rep2(i,1,n+1){
+		ll x;
+		scanf("%lld",&x);
+		add_area(i,i,x);    //差分
+	}
+	while(m--){
+		ll cmd,x,y,z;
+		scanf("%lld",&cmd);
+		if(cmd == 1){
+			scanf("%lld%lld%lld",&x,&y,&z);
+			 add_area(x,y,z);
+//			 cout<<1<<endl;
+		}else{
+			scanf("%lld",&x);
+			cout<<pre_sum(x)<<endl;
+		}
+	}
+
+	return 0;
+}

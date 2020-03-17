@@ -1,0 +1,81 @@
+#include<iostream>
+#include<vector>
+#include<cstdio>
+#include<cmath>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mode = 1e9 + 7;
+
+ll f[N],r[N];
+
+void init(ll n){
+	rep(i,n+1){
+		f[i] = i;
+		r[i] = 0;
+	}
+}
+
+ll Find(ll x){
+	if(x == f[x]) return x;
+	ll tmp = f[x];
+	f[x] = Find(f[x]);
+	r[x] = (r[x] + r[tmp]) % 3; //祖先节点和父节点的种类推导出我的种类 
+	return f[x];
+}
+
+void Union(ll rs, ll a, ll b){
+	ll x = Find(a), y = Find(b);
+	if(x != y){
+		f[x] = y;
+		r[x] = (r[b] - r[a] + rs + 3) % 3;
+	}
+}
+
+bool check(ll rs, ll x, ll y){
+	if(Find(x) == Find(y)){
+		ll tmp = ((r[x] - r[y])%3 + 3) % 3;
+		return tmp == rs;
+	}
+	return true;
+}
+
+int main(){
+	ll n,m;
+	cin>>n>>m;
+	init(n);
+	ll ans = 0;
+	rep(i,m){
+		ll rs,x,y;
+		scanf("%lld%lld%lld",&rs,&x,&y);
+		rs--;
+		if(rs == 1 && x == y){
+			ans++;
+		}else if(x > n || y > n){
+			ans++;
+		}else{
+			if(check(rs,x,y)){
+				Union(rs,x,y);
+			}else{
+				ans++;
+			}
+		}
+	}
+	cout<<ans<<endl;
+
+	return 0;
+}
+
+
+
+
+
+

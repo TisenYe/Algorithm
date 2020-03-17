@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+#include<math.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9+7;
+const ll N = 1e3 + 200;
+const ll INF = 9999999999999;
+const double eps = 1e-5;
+
+
+ll fat[N];
+ll inv[N];
+ll finv[N];
+void Init(ll N){    //最大位数（2*n）
+    ll i,j;
+    for(i=2,inv[1]=1;i<=N;i++) inv[i]=((mod - mod/i)*1ll*inv[mod%i])%mod;
+    for(i=1,fat[0]=1,finv[0]=1;i<=N;i++){
+        fat[i]=(fat[i-1]*i)%mod;
+        finv[i]=(finv[i-1]*inv[i])%mod;
+    }
+}
+ll C(ll n,ll m){
+    ll res=1;
+    res=res*fat[n]%mod;
+    res=(res*finv[m]%mod*finv[n-m]%mod);
+    return res;
+}
+ll Ctl(ll n){       //第n位卡特兰数
+    return (C(2*n,n)-C(2*n,n-1)+mod)%mod;
+}
+int main(){
+    ll n;
+    cin>>n;
+    Init(2*n);
+    cout<<Ctl(n)<<endl;
+    return 0;
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+/*
+#include<cstdio>
+#define siz 20
+using namespace std;
+int n;
+int c[siz*2][siz];
+int main(){
+
+    scanf("%d",&n);
+    for(int i=1;i<=2*n;i++) c[i][1]=c[i][i]=1;
+    for(int i=3;i<=2*n;i++)
+     for(int j=2;j<i;j++)
+      c[i][j]=c[i-1][j]+c[i-1][j-1];
+    printf("%d",c[2*n][n]-c[2*n][n-1]);
+    return 0;
+}
+*/
+
