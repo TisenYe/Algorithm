@@ -55,4 +55,4 @@ int main(){
     	cin>>a>>b>>m;
     	cout<<dfs(a,b,m)%m<<endl;
     }
-	}
+}
