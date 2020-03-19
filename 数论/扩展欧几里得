@@ -12,6 +12,10 @@ const ll INF = 9999999999999;
 const double eps = 1e-5;
 
 
+int gcd(int a, int b) {
+    return !b ? a : gcd(b, a % b);
+}
+
 void Exgcd(ll a, ll b, ll &x, ll &y) {      //x,y为 a*x + b*y == c的一组解
     if (!b) x = 1, y = 0;
     else Exgcd(b, a % b, y, x), y -= a / b * x;
