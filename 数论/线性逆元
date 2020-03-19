@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>         //Luogu P3811
+#include<math.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9+7;
+const ll N = 1e6 + 200;
+const ll INF = 9999999999999;
+const double eps = 1e-5;
+
+
+ll inv[N];
+int main(){
+    ll n,p;
+    cin>>n>>p;
+    inv[1] = 1;
+    for(int i = 2; i <= n; i++){
+        inv[i] = (p - p/i)*inv[p%i]%p;
+    }
+    for(int i = 1; i <= n; i++){
+        cout<<inv[i]<<endl;
+    }
+    return 0;
+}
