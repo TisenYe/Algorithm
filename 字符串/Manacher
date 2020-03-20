@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 998244353;
+const ll N = 2e5 + 200;
+const ll INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+
+string Manacher(string s){
+    string t = "$#";
+    ll n = s.length();
+    rep(i,n){
+        t += s[i];
+        t += '#';
+    } 
+    n = t.length();
+    vector<int> p(n);               //p数组记录当前为最大回文子串
+    int mx = 0, id = 0, resLen = 0, resCenter = 0;
+    for(int i = 1; i < n; i++){
+        p[i] = mx > i ? min(p[2 * id - i], mx - i) : 1;
+        while(t[i + p[i]] == t[i - p[i]]) ++p[i];
+        if(mx < i + p[i]){
+            mx = i + p[i];
+            id = i;
+        }
+        if(resLen < p[i]){
+            resLen = p[i];              //resLen 为最长回文子串长度
+            resCenter = i;
+        }
+    }
+    return s.substr((resCenter - resLen) / 2, resLen - 1);
+}
+int main(){
+    string s;
+    cin>>s;
+    cout<<Manacher(s)<<endl;
+    return 0;
+}
