@@ -1,0 +1,124 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e6 + 200;
+const ll INF = 1e18;
+const double eps = 1e-7;
+
+typedef struct nod{
+    int v,Next;
+    ll w;
+}nods;
+nods edge[2*N];
+int head[2*N], tot = -1, n,m;     // tot一定要赋值为-1！！！
+void add(int u, int v, ll w, int flag){
+    edge[++tot].v = v;
+    edge[tot].Next =head[u];
+    edge[tot].w = w;
+    head[u] = tot;
+}
+int deep[N], cur[N], lst[N], num[N];
+
+void bfs(int t){
+    queue<int> q;
+    rep2(i,1,n+1){
+        deep[i] = n;
+    }
+    rep2(i,1,m+1){
+        cur[i] = head[i];
+    }
+    deep[t] = 0;
+    q.push(t);
+    while(!q.empty()){
+        int tmp = q.front();
+        q.pop();
+        for(int i = head[tmp]; i != -1; i = edge[i].Next){
+            int v = edge[i].v;
+            if(deep[v] == n && edge[i^1].w){
+                deep[v] = deep[tmp] + 1;
+                q.push(v); 
+            }
+        }
+    }
+}
+
+
+ll add_flow(int s, int t){
+    ll ans = INF;
+    int nw = t;
+    while(nw != s){
+        ans = min(ans, edge[lst[nw]].w);
+        nw = edge[lst[nw]^1].v;
+    }
+    nw = t;
+    while(nw != s){
+        edge[lst[nw]].w -= ans;
+        edge[lst[nw]^1].w += ans;
+        nw = edge[lst[nw]^1].v;
+    }
+    return ans;
+}
+
+
+ll ISAP(int s, int t){
+    int nw = s;
+    bfs(t);
+    rep2(i,1,n+1){
+        num[deep[i]]++;
+    }
+    ll maxflow = 0;
+    while(deep[s] < n){
+        if(nw == t){
+            maxflow += add_flow(s, t);
+            nw = s;
+        }
+        int flag = 0;
+        for(int i = cur[nw]; i != -1; i = edge[i].Next){
+            int v = edge[i].v;
+            if(deep[nw] == deep[v] + 1 && edge[i].w){
+                // cout<<v<<endl;
+                flag = 1;
+                nw = v;
+                lst[v] = i;
+                break;
+            }
+        }
+        
+        if(!flag){
+            int mi = n-1;
+            for(int i = head[nw]; i != -1; i = edge[i].Next){
+                if(edge[i].w){
+                    mi = min(mi, deep[edge[i].v]);
+                }
+            }
+            if((--num[deep[nw]]) == 0) break;
+            num[deep[nw] = mi + 1]++;
+            cur[nw] = head[nw];
+            if(nw != s){
+                nw = edge[lst[nw]^1].v;
+            }
+        }
+    }
+    return maxflow;
+}
+
+int main(){
+    int s,t;
+    memset(head, -1, sizeof(head));
+    cin>>n>>m>>s>>t;
+    int x,y;
+    ll w;
+    rep(i,m){
+        scanf("%d%d%lld",&x,&y,&w);
+        add(x,y,w,1);
+        add(y,x,0,0);
+    }
+    ll mxflow = ISAP(s,t);
+    cout<<mxflow<<endl;
+    return 0;
+}
