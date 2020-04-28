@@ -1,0 +1,84 @@
+
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+int head[N],tot = 1;
+struct nod{
+	int Next,v;
+}edge[N];
+
+void add(int u, int v){
+	edge[++tot].v = v;
+	edge[tot].Next = head[u];
+	head[u] = tot;
+}
+
+ll val[N];
+vector<ll> v[N];
+bool vis[N];
+ll dp[2][N], pass;					//pass为当前选择拆的边
+void dfs(int root, int pre){		//跑树规
+	dp[0][root] = 0;
+	dp[1][root] = val[root];
+	ll len = v[root].size();
+	for(int i = head[root]; i; i = edge[i].Next){
+		int v = edge[i].v;
+		if(v == pre) continue;
+		if(i == pass || i == (pass^1)) continue;	//跳过选择拆的边
+		dfs(v, root);
+		ll son = v;
+		dp[0][root] += max(dp[0][son], dp[1][son]);		//DP
+		dp[1][root] += dp[0][son];
+	}
+}
+
+int flag = 0;						//加效率
+ll ans = 0;
+void circle(int nw, int pre){		//找环
+	if(flag) return;
+	if(!vis[nw]) vis[nw] = 1;
+	for(int i = head[nw]; i; i = edge[i].Next){
+		int v = edge[i].v;
+		if(v == pre) continue;
+		if(!vis[v]){
+			circle(v,nw);
+		}else{
+			flag = 1;
+			pass = i;
+			// cout<<i<<endl;
+			dfs(nw, v);
+			ans = dp[0][nw];
+			dfs(v,nw);
+			ans = max(dp[0][v], ans);
+			return;
+		}
+	}
+}
+
+int main(){
+	ll n;
+	cin>>n;
+	rep(i,n){
+		cin>>val[i];
+	}
+	rep(i,n){
+		int x,y;
+		cin>>x>>y;
+		add(x,y);
+		add(y,x);
+	}
+	double k;
+	cin>>k;
+	circle(0,0);
+	printf("%.1f\n",k*ans);
+	return 0;
+}
