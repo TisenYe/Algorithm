@@ -1,0 +1,70 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 2017;
+const ll N = 2e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+typedef struct Matrix{
+    int a[31][31];
+    inline Matrix operator * (const Matrix &tmp){
+        Matrix ret;
+        memset(&ret, 0, sizeof(ret));
+        rep(i,31){
+            rep(j,31){
+                rep(k,31){
+                    ret.a[i][j] += a[i][k] * tmp.a[k][j]%mod;
+                    ret.a[i][j] %= mod;
+                }
+            }
+        }
+        return ret;
+    }
+}Mat;
+
+Mat ksm(Mat &a, int m){
+    Mat tmp;
+    memset(&tmp, 0, sizeof(tmp));
+    rep(i,31){
+        tmp.a[i][i] = 1;
+    }
+    while(m){
+        if(m&1) tmp = tmp * a;
+        a = a * a;
+        m >>= 1;
+    }
+    return tmp;
+}
+
+int main(){
+    ll n,m;
+    cin>>n>>m;
+    Mat mp;
+    memset(&mp, 0, sizeof(mp));
+    int x,y;
+    rep(i,m){
+       cin>>x>>y;
+       mp.a[x][y] = 1;
+       mp.a[y][x] = 1; 
+    }
+    rep(i,n+1){
+        mp.a[i][i] = 1;
+    }
+    rep2(i,1,n+1){
+        mp.a[i][0] = 1;
+    }
+    int p;
+    cin>>p;
+    Mat ans = ksm(mp,p);
+    ll rst = 0;
+    rep(i,n+1){
+        rst += ans.a[1][i];
+        rst %= mod;
+    }
+    cout<<rst<<endl;
+}

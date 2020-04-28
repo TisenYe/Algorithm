@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+typedef struct nod{
+    int v,Next;
+    ll w;
+}nods;
+nods edge[2*N];
+int head[2*N], tot = -1, n;     // tot一定要赋值为-1！！！
+void add(int u, int v, ll w, int flag){
+    edge[++tot].v = v;
+    if(flag) edge[tot].w = w;
+    edge[tot].Next =head[u];
+    head[u] = tot;
+}
+int deep[N], cur[N];
+
+int bfs(int s, int t){
+    memset(deep, INF, sizeof(deep));
+    deep[s] = 0;
+    queue<int> q;
+    rep2(i,1,n+1) cur[i] = head[i];
+    q.push(s);
+    while(!q.empty()){
+        int tmp = q.front();
+        q.pop();
+        for(int i = head[tmp]; i; i = edge[i].Next){
+            if(deep[edge[i].v] == INF && edge[i].w){
+                deep[edge[i].v] = deep[tmp] + 1;
+                q.push(edge[i].v);
+            }
+        }
+    }
+    if(deep[t] != INF) return true;
+    return false;
+
+}
+ll dfs(int nw, int t, ll lmt){
+    if(!lmt || nw == t) return lmt;
+    ll flow = 0, f;
+    for(int i = cur[nw]; i; i = edge[i].Next){
+        int v = edge[i].v;
+        if(deep[v] == deep[nw] + 1 && (f = dfs(v, t, min(lmt, edge[i].w)))){
+            flow += f;
+            lmt -= f;
+            edge[i].w -= f;
+            edge[i^1].w += f;
+            if(!lmt) break;
+        }
+    }
+    return flow;
+}
+
+
+ll Dinic(int s, int t){
+    ll mxflow = 0;
+    while(bfs(s,t)){
+        mxflow += dfs(s,t,INF);
+    }
+    return mxflow;
+}
+
+int main(){
+    int m,s,t;
+    cin>>n>>m>>s>>t;
+    int x,y;
+    ll w;
+    rep(i,m){
+        scanf("%d%d%lld",&x,&y,&w);
+        add(x,y,w,1);
+        add(y,x,w,0);
+    }
+    ll mxflow = Dinic(s,t);
+    cout<<mxflow<<endl;
+    return 0;
+}

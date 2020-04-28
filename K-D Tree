@@ -1,0 +1,59 @@
+
+LL dist(const Point &x, const Point &y) {
+    LL ret = 0;
+    for (int i = 0; i < dim; i++) {
+        ret += sqr(x.x[i] - y.x[i]);
+    }
+    return ret ? ret : inf;
+}
+
+void build(const int &l, const int &r, const int &depth) {
+    if (l >= r) return;
+    int m = l + r >> 1;
+    cur = depth % dim;
+    nth_element(p + l, p + m, p + r + 1, cmp);
+    build(lson);
+    build(rson);
+}
+
+LL Find(const Point &x, const int &l, const int &r, const int &depth) {
+    int cur = depth % dim;
+    if (l >= r) {
+        if (l == r) return dist(x, p[l]);
+        return inf;
+    }
+    int m = l + r >> 1;
+    LL ret = dist(x, p[m]), tmp;
+    if (x.x[cur] < p[m].x[cur]) {
+        tmp = Find(x, lson);
+        if (tmp > sqr(x.x[cur] - p[m].x[cur])) {
+            tmp = min(tmp, Find(x, rson));
+        }
+    } else {
+        tmp = Find(x, rson);
+        if (tmp > sqr(x.x[cur] - p[m].x[cur])) {
+            tmp = min(tmp, Find(x, lson));
+        }
+    }
+    return min(ret, tmp);
+}
+
+int main() {
+    int n, T;
+    scanf("%d", &T);
+    while (T--) {
+        scanf("%d", &n);
+        dim = 2;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < 2; j++) {
+                scanf("%I64d", &ori[i].x[j]);
+            }
+            p[i] = ori[i];
+        }
+        build(0, n - 1, 0);
+        for (int i = 0; i < n; i++) {
+            printf("%I64d\n", Find(ori[i], 0, n - 1, 0));
+        }
+    }
+    return 0;
+}
