@@ -1,0 +1,99 @@
+
+#include<bits/stdc++.h>  //https://www.luogu.com.cn/problem/P1903
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 1e6 + 20;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+int read(){
+    int a=0,f=0;char c=getchar();
+    for(;c<'0'||c>'9';c=getchar())if(c=='-')f=1;
+    for(;c>='0'&&c<='9';c=getchar())a=a*10+c-'0';
+    return f?-a:a;
+}
+struct query{
+    int l,r;
+    int time;
+    int id;
+}q[N];
+struct tim{
+    int color, pos;
+}t[N];
+
+int a[N], belong[N], cnt[N], ans[N];
+
+int numq,numt,block;
+
+bool cmp(query a, query b){
+    return belong[a.l] ^ belong[b.l] ? belong[a.l] < belong[b.l] : (belong[a.r] ^ belong[b.r] ? belong[a.r] < belong[b.r] : a.time < b.time);
+    // if(a.l / block != b.l /block) return a.l / block < b.l / block;
+    // if(a.r / block != b.r /block) return a.r / block < b.r / block;
+    // return a.time < b.time;
+
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    int n,m;
+    n = read(), m = read();
+    rep(i,n){
+        a[i+1] = read(); 
+    }
+    
+    // cout<<block<<endl;
+    rep(i,m){
+        char c;
+        scanf("%c", &c);
+        if(c == 'R'){
+            t[++numt].pos = read();
+            t[numt].color = read();
+        }else{
+            q[++numq].l = read();
+            q[numq].r = read();
+            q[numq].time = numt;
+            q[numq].id = numq;
+        }
+    }
+    block = pow(n, 2.0 / 3.0);
+    int blockn = ceil((double) n / block);
+    rep(i,blockn){
+        for(int j = i*block + 1; j <= (i+1)*block; j++){
+            belong[j] = i+1;
+        }
+    }
+    sort(q+1, q+numq+1, cmp);
+    int l = 1, r = 0, tim = 0, now = 0;
+    rep2(i, 1, numq+1){
+        int ql = q[i].l, qr = q[i].r, qt = q[i].time;
+        while(l < ql) now -= !--cnt[a[l++]];                //老四样，左右横跳
+        while(l > ql) now += !cnt[a[--l]]++;
+        while(r < qr) now += !cnt[a[++r]]++;
+        while(r > qr) now -= !--cnt[a[r--]];
+        while(tim < qt){                                    //时间转换！！！
+            ++tim;
+            if(ql <= t[tim].pos && qr >= t[tim].pos){
+                now -= !--cnt[a[t[tim].pos]] - !cnt[t[tim].color]++;    //先减去当前要改变的颜色的数量，在加上cnt[t[tim].color]为当前tim需要加的颜色
+            }
+            swap(a[t[tim].pos], t[tim].color);
+        }
+        while(tim > qt){
+            if(ql <= t[tim].pos && qr >= t[tim].pos){
+                now -= !--cnt[a[t[tim].pos]] - !cnt[t[tim].color]++;
+            }
+            swap(a[t[tim].pos], t[tim].color);
+            --tim;
+        }
+        ans[q[i].id] = now;
+    }
+    rep2(i, 1, numq+1){
+        printf("%d\n", ans[i]);
+    }
+    
+    return 0;
+}
