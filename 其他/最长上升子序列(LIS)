@@ -1,0 +1,37 @@
+
+#include<iostream>
+#include<algorithm>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+//贪心+二分，所求结果为最长上升子序列长度，但是dp数组中的内容不为最长上升子序列内容（无法保证成子序列）！！
+int a[N], dp[N];
+int main(){
+    ios::sync_with_stdio(false);
+    ll n;
+    cin>>n;
+    rep(i,n){
+        cin>>a[i];
+    }
+    int now = 0;
+    dp[0] = a[0];
+    rep2(i,1,n){
+        if(a[i] > dp[now]){
+            dp[++now] = a[i];
+        }else{
+            int pos = lower_bound(dp, dp+now, a[i]) - dp;
+            dp[pos] = a[i];
+        }
+    }
+    cout<<now+1<<endl;
+    
+    return 0;
+}

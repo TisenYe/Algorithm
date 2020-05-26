@@ -1,0 +1,1051 @@
+STL应用
+
+
+
+
+1.	运算符重载		-------------------------------------- 2
+2.	Vector				-------------------------------------- 6
+3.	List					-------------------------------------- 12
+4.	Dequeue			-------------------------------------- 16
+5.	String				-------------------------------------- 19
+6.	Pair					-------------------------------------- 23
+7.	Set					-------------------------------------- 24
+8.	Map					-------------------------------------- 27
+9.	Bitset					-------------------------------------- 28
+10.	Stack				-------------------------------------- 30
+11.	Queue			-------------------------------------- 31
+12.	Algorithm		-------------------------------------- 33
+13.	Sstream			-------------------------------------- 37
+
+
+
+
+
+
+
+
+
+运算符重载
+ClassType& operator= (const ClassType& copySource) {
+    if (this == &copySource) { // 先判断是否相等，避免重复赋值
+        return *this;
+    }
+    // 拷贝的逻辑实现，避免浅复制问题
+    return *this;
+}
+如果没有重载赋值运算符，系统会有一个默认的实现，但可能导致浅复制的问题。如果要实现深复制，就需要重载赋值运算符。
+
+下标运算符（[]）：
+
+const char& operator[] (int index) const {
+    return buffer[index];
+}
+逻辑与（&&）和逻辑或（||）：
+
+不推荐重载这两个运算符。
+
+原因：我们知道 && 和 || 是有短路的，即 &&前面为假时，后面将不会计算了，同理 || 前面为真时也将跳过后面的计算。但是如果是重载了这两个运算符，则会失去短路效果。
+
+ 
+
+3. 不能重载的运算符
+成员运算符（.）、指针成员选择（.*）、作用域解析（::）、条件三目运算符（?:）、获取类型大小（sizeof）。
+
+ 
+
+ 一些比较特别的运算符重载
+函数运算符 operator()：
+
+#include <iostream>
+ 
+using namespace std;
+ 
+class Demo
+{
+public:
+    void operator () (const char *input) const {
+        cout << input << endl;
+    }
+};
+ 
+int main()
+{
+    Demo demo;
+    // 调用函数运算符，参数为一个字符串
+    demo("hello world");
+    return 0;
+}
+operator() 让对象变得像函数，这个运算符也被称为 operator() 函数。
+
+当然上例中的 operator() 的参数、返回值、实现都是可以根据具体需求改变的。
+
+自定义字面量：
+
+在一些表示温度、千米等特殊的单位，C++ 本身是没有这些东西的，但是我们可以像下面这样定义自己的字面量：
+
+// 都转换为以 “米” 为单位
+long double operator"" _mm(long double x) { return x / 1000; }
+long double operator"" _m(long double x)  { return x; }
+long double operator"" _km(long double x) { return x * 1000; }
+注意这里括号里的参数类型只能为（返回值无要求）：
+
+void operator"" _test(unsigned long long int a) {}
+void operator"" _test(long double a) {}
+void operator"" _test(char a) {}
+void operator"" _test(wchar_t a) {}
+void operator"" _test(char16_t a) {}
+void operator"" _test(char32_t a) {}
+void operator"" _test(const char* a) {}
+void operator"" _test(const char* a, size_t b) {}
+void operator"" _test(const wchar_t* a, size_t b) {}
+void operator"" _test(const char16_t* a, size_t b) {}
+void operator"" _test(const char32_t* a, size_t b) {}
+使用 cout << obj << endl; 打印类对象：
+
+#include <iostream>
+ 
+using namespace std;
+ 
+class Test
+{
+public:
+    // 使用友元函数使其可以访问类的私有属性
+    friend ostream & operator << (ostream& os, Test & test);
+    Test(int a)
+    {
+        this->a = a;
+    }
+private:
+    int a;
+};
+ 
+// 这里只能使用友元函数来实现，因为我们没法修改 cout 的左移函数的代码实现
+ostream& operator << (ostream& os, Test & test)
+{
+    os << test.a;
+    return os;
+}
+ 
+int main()
+{
+    Test test(10);
+    cout << test << endl;
+    return 0;
+}
+
+
+重载例子：
+char & MyString::operator[](int index)
+{
+    return m_str[index];
+}
+ 
+bool MyString::operator==(const MyString & str)
+{
+    if (m_len != str.m_len)
+    {
+        return false;
+    }
+    return strcmp(m_str, str.m_str) == 0;
+}
+ 
+bool MyString::operator!=(const MyString & str)
+{
+    return !operator==(str);
+}
+ 
+bool MyString::operator>(const char * str)
+{
+    return strcmp(m_str, str) > 0;
+}
+ 
+bool MyString::operator<(const char * str)
+{
+    return strcmp(m_str, str) < 0;
+}
+ 
+bool MyString::operator>(const MyString & str)
+{
+    return strcmp(m_str, str.m_str) > 0;
+}
+ 
+bool MyString::operator<(const MyString & str)
+{
+    return strcmp(m_str, str.m_str) < 0;
+}
+ 
+ostream & operator<<(ostream & out, MyString & str)
+{
+    out << str.m_str;
+    return out;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#include<vector>
+vector的元素可以是任意类型T，但必须具备赋值和拷贝能力。
+- vector对象的定义和初始化
+STL 容器的很多参数和返回值，往往并不是int，而是size_t，这个类型在32位机器为unsigned in t，64位机器上为unsigned long，下面给出的参数类型统一都用int代替。
+vector <T> vec; // vector保存类型为T的对象。默认构造函数vec为空。
+
+vector <T> vec(vector <T> vec2); // vec是vec2的一个副本
+
+vector <T> vec(int n, T i); // vec含有n个数值为i的元素
+
+vector <T> vec(int n); // vec含有n个数值为0的元素
+
+vector <T> vec(itr beg, itr end); // 产生一个vector，以区间[beg,end]为元素初值
+- vector的大小和容量
+vector类定义了方法（成员函数）size()和capacity()来实现统计容器元素的目的。其中，size()返回容器中现有的元素数量（以下简称数量），capacity()返回容器目前能容纳的元素数量（以下简称容量）。
+如果需要重新设置数量用resize()方法，如果需要重新设置容量用reserve()方法。
+- vector中元素的访问
+因为运算符重载的存在，vector可以直接通过下标运算符[]来进行随机访问，vector也提供了方法at()来进行随机访问，相比于通过[]来访问，at()方法会在运行时检查下标是否越界，但是越界检查会影响运行效率，在调试中可以使用at()方法，但是在最后提交中一般建议使用[]来进行随机访问。
+此外，vector容器还提供了front()和back()方法用于读取或修改头尾的元素。
+T& v[int idx];
+
+T& v.at(int idx);
+
+T& v.front();
+T& v.back();
+具体用法，便是：
+vector <int> v(5);
+
+int a = v[0];
+a = v.at(0);
+a = v.front();
+a = v.back();
+
+v[0] = a;
+v.at(0) = a;
+v.front() = a;
+v.back() = a;
+以上的访问方法的时间复杂度均为O(1)。
+- vector中元素的遍历
+终于要将迭代器了。 vector容器中的元素有两种遍历方法，一种是通过下标像数组一样遍历：
+vector <int> v;
+for (int i = 0; i < v.size(); i++)
+  cout<<v[i]<<endl;
+还有一种方法，就是通过迭代器进行遍历。
+迭代器简单的来说就是将容器内部的指针进行了封装。
+我们想一想普通数组如果用指针遍历应该怎么办呢？
+int n = 100;
+int arr[n + 1];
+for(int* p = arr; p != &arr[n]; p++)
+  cout<< *p<< endl;而迭代器的声明如下：
+vector <T> iterator::itr;
+这个迭代器就相当于这个容器用于遍历的指针，用法如下：
+for(itr = v.begin(); itr != v.end(); itr++)
+  cout<< *itr<< endl;
+begin()和end()是vector容器提供的两个方法，前者返回头部元素的位置，后者返回的是尾部元素之后的位置。
+而我们如果需要对元素进行逆向的遍历，则需要更换另一种迭代器，同时声明头文件itreator。
+#include <iterator>
+
+vector <int> v;
+vector <int> reverse_iterator::ritr;
+
+for(ritr = v.rbegin(); ritr != v.rend(); ritr++)
+  cout<< *ritr<< endl;
+rbegin()方法返回头部元素之前的位置，rend()返回尾部元素的位置。
+对于不需要用到下标的正向遍历，我们可以用下面这种C++ 11标准加入的for语句使用方法：
+for(int i: v)
+  cout<< i<< endl;
+for(int& i: v)
+  i = 1;
+注意的是，如果需要修改容器的元素，一定要将i声明成引用。
+而其他需要用到迭代器的地方，我们也可以用auto关键字进行简化：
+for(auto i = v.rbegin(); i != v.rend(); i++)
+  cout<< *i<< endl;
+两个同类迭代器之间可以用成员函数distance()来求距离：
+#include <iterator>
+
+distance(first, last);//返回last - first的距离  
+需要注意的是，distance()方法只有在诸如vector，deque等能随机访问元素的容器的迭代器上面有较好的效率，即时间复杂度为O(1)，反之，在诸如list，set等不支持随机访问元素的容器的迭代器上面则需要O(n)的时间复杂度来完成距离计算。
+两个同类型的迭代器还能用iter_swap()方法进行交换
+#include <iterator>
+
+iter_swap(itr1, itr2);
+- vector中元素的插入
+vector容器提供了push_back()方法用于在尾部插入元素，同时提供了insert()方法进行随机插入。
+push_back()的时间复杂度为O(1)。
+insert()的时间复杂度为O(n)。
+方法如下：
+void v.push_back(T e); //在尾部插入e的副本
+
+itr v.insert(itr pos, T e); //在pos位置插入元素e的副本，并返回新元素位置
+
+itr v.insert(itr pos, int n, T e); //在pos位置插入n个元素e的副本
+
+itr v.insert(itr pos, itr beg, itr end); //在pos位置插入区间[beg,end]内所有元素的副本
+具体用法如下：
+std::vector<int> v(4, 2);
+v.insert(v.begin() + 1, 3);
+在插入之前，v中的元素为：
+Index	Value
+0	2
+1	2
+2	2
+3	2
+插入之后，变为了：
+Index	Value
+0	2
+1	3
+2	2
+3	2
+4	2
+- vector中元素的删除
+vector容器提供了pop_back()方法用于在尾部删除元素，同时提供了erase()方法进行随机删除。
+pop_back()的时间复杂度为O(1)。
+erase()的时间复杂度为O(n)。
+方法如下：
+void v.pop_back(); //移除尾部元素但不返回
+
+itr v.erase(itr pos); //删除pos位置的元素，返回下一个元素的位置
+
+itr v.erase(itr beg, itr end); //删除区间[beg,end]内所有元素，返回下一个元素的位置
+- vector中的操作符
+如果vector里面存放元素是简单类型（C++自带的那些类型）的话，可以使用操作符==和!=判断两个vector是否相等。还可以通过>, <, >=, <=操作符比较两个vector容器内元素的字典序。
+- vector中其他方法
+1.	清空元素 方法clear()，时间复杂度O(n)。
+注意clear()方法只清空元素并不释放内存。
+2.	判断为空 方法empty()返回值为容器的数量是否为空。
+3.	交换元素 方法swap()
+使用方法：v1.swap(v2);
+4.	拷贝元素 方法assign()
+使用方法：v.assign(int n, T e); 将n个元素e赋值给v
+v.assign(itr begin, itr end); 将区间[begin, end]的元素赋值给v
+
+
+
+
+
+#include<list>
+list
+list是C++ STL提供的双向链表容器。不支持随机存取，但是有良好的插入和删除效率。
+使用list容器需要声明头文件：
+#include <list>
+- list对象的定义和初始化
+list <T> l; // 产生空的list
+
+list <T> l(list <T> l2); // 生成一个复制了l2的所有元素的l
+
+list <T> l(int n); // 生成一个含有n个空元素的的list
+
+list <T> l(int n, T e); // 生成一个含有n个值为e的元素的list
+
+list <T> l(itr beg, itr end); //产生一个list，以区间[beg,end]为元素初值
+- list的大小和容量
+list容器基于双向链表，不会出现如vector容器那样的元素数量和元素容量不同的问题。
+list容器提供了size()方法返回当前元素个数，并提供了max_size()方法返回所能容纳的最大元素个数。
+需要注意的是，对于gcc编译器，只有在gcc 5.0及以上并开启了C++ 11及以上标准的编译指令后，size()方法的时间复杂度为O(1)，在其他情况下，gcc所实现的list.size()的时间复杂度为O(n)。
+list容器的max_size同样非常大，在算法竞赛中一般不需要关心。
+- list中元素的访问
+list容器不支持随机访问，仅提供front()和back()方法访问首尾元素。
+T& l.front();
+
+T& l.back();
+- list中元素的遍历
+list容器不能通过下标进行元素遍历，只能通过迭代器进行遍历:
+list <T> iterator::itr;
+for (itr = lt.begin(); itr != lt.end(); itr++)
+  cout<< *itr<< endl;
+
+for (T i: lt)
+  cout<< i<< endl;
+
+- list中元素的插入
+void l.push_front(T e); //在头部插入e的副本
+
+void l.push_back(T e); //在尾部插入e的副本
+
+itr l.insert(itr pos, T e); //在pos位置插入元素e的副本，并返回新元素位置
+
+itr l.insert(itr pos, int n, T e); //在pos位置插入n个元素e的副本
+
+itr l.insert(itr pos, itr beg, itr end); //在pos位置插入区间[beg,end]内所有元素的副本
+- list中元素的删除
+list容器提供了用于进行选择删除的方法。
+void l.pop_front(); //移除头部元素但不返回
+
+void l.pop_back(); //移除尾部元素但不返回
+
+itr l.erase(int pos); //删除pos位置的元素，返回下一个元素的位置
+
+itr l.erase(itr beg, itr end); //删除区间[beg,end]内所有元素，返回下一个元素的位置
+
+void l.remove(T e); //删除所有值为e的元素
+
+void l.remove_if(func f); //删除所有func(e) == true 的元素
+
+void l.unique(); //删除所有重复元素
+
+void l.unique(func f); //删除所有func(e)  =true 的重复元素
+- list中的操作符
+如果list里面存放元素是简单类型的话，可以使用操作符==和!=判断两个list是否相等。还可以通过>, <, >=, <=操作符比较两个list容器内元素的字典序。
+- list中元素的排序
+void l.sort(); //按照元素的<操作符进行排序
+
+void l.sort(func f); //按照f函数为准则对元素进行排序
+- list中元素的拷贝
+void l.assign(int n, T e); //将n个元素e赋值给l
+
+void l.assign(itr begin, itr end); //将区间[begin, end]的元素赋值给l
+
+void l.merge(list l2); //若l, l2都已排序，那么将l2元素拷贝到l并保证拷贝后的序列有序
+
+void l.splice(itr pos, list l2); //将l2的元素拷贝到l的pos位置之前
+
+void l.splice(itr pos, list l2, itr l2pos); //将l2pos所指元素拷贝到pos之前
+
+void l.splice(ire pos, list l2, itr beg, itr end); //将l2的[beg, end]内元素拷贝到pos之前
+- list中的其他方法
+1.	清空元素 方法clear()，时间复杂度O(n)。
+2.	判断为空 方法empty()返回值为容器的数量是否为空。
+3.	交换元素 方法swap()
+使用方法：l1.swap(l2);
+4.	反转元素顺序 方法reverse()。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include<dequeue>
+deque是C++ STL提供的双端队列容器，支持头尾的增删操作。
+因为deque的内部实现与vector不同（deque会用多段定长连续空间实现），deque容器的随机存取速度会慢于vector容器。
+要使用deque容器，应包含头文件
+#include <deque>
+- deque对象的定义和初始化
+
+deque <T> d; // 产生空的deque
+
+deque <T> d(deque <T> d2); // 生成一个复制了d2的所有元素的d
+
+deque <T> d(int n); // 生成一个含有n个空元素的的deque
+
+deque <T> d(int n, T e); // 生成一个含有n个值为e的元素的deque
+
+deque <T> d(itr beg, itr end); //产生一个deque，以区间[beg,end]为元素初值
+
+- deque的大小和容量
+deque容器提供了size()方法返回当前元素个数，并提供了max_size()方法返回所能容纳的最大元素个数。
+deque容器的max_size同样非常大，在算法竞赛中一般不需要关心。
+- deque中元素的访问
+deque容器虽然支持随机访问，但是其随机访问速度慢于vector容器。
+T& d[int idx];
+
+T& d.at(int idx);
+
+T& d.front();
+
+T& d.back();
+
+- deque中元素的遍历
+deque容器支持随机存取，所以可以像数组那样通过下标进行遍历，但是因为deque的随机访问较慢，所以并不推荐这种写法：
+for (int i = 0; i < d.size(); i++)
+  cout<< d[i]<< endl;
+
+deque容器支持迭代器遍历：
+dequen <T> iterator::itr;
+for (itr = d.begin(); itr != d.end(); itr++)
+  cout<< *itr<< endl;
+
+
+- deque中元素的插入
+void d.push_front(T e); //在头部插入e的副本
+
+void d.push_back(T e); //在尾部插入e的副本
+
+itr d.insert(itr pos, T e); //在pos位置插入元素e的副本，并返回新元素位置
+
+itr d.insert(itr pos, int n, T e); //在pos位置插入n个元素e的副本
+
+itr d.insert(itr pos, itr beg, itr end); //在pos位置插入区间[beg,end]内所有元素的副本
+
+- deque中元素的删除
+void d.pop_front(); //移除头部元素但不返回
+
+void d.pop_back(); //移除尾部元素但不返回
+
+itr d.erase(int pos); //删除pos位置的元素，返回下一个元素的位置
+
+itr d.erase(itr beg, itr end); //删除区间[beg,end]内所有元素，返回下一个元素的位置
+
+void d.clear(); //清空元素
+- deque中的操作符
+如果deque里面存放元素是简单类型的话，可以使用操作符==和!=判断两个deque是否相等。还可以通过>, <, >=, <=操作符比较两个deque容器内元素的字典序。
+- deque中元素的拷贝
+void l.assign(int n, T e); //将n个元素e赋值给d
+
+void l.assign(itr begin, itr end); //将区间[begin, end]的元素赋值给d
+
+- deque中的其他方法
+1.	清空元素 方法clear()。
+2.	判断为空 方法empty()返回值为容器的数量是否为空。
+3.	交换元素 方法swap()
+使用方法：d1.swap(l2);
+vector, list, queue的选择
+算法竞赛中这三个基本上就用vector（逃
+•	如果你需要高效的随即存取，而不在乎插入和删除的效率，使用vector
+•	如果你需要大量的插入和删除，而不关心随即存取，则应使用list
+•	如果你需要随即存取，而且关心两端数据的插入和删除，则应使用deque。
+•	在搞不清状态时，通常vector是最佳选择。
+
+
+
+
+
+
+
+
+
+
+
+
+#include<string>
+string
+string类是C++ STL提供的字符串类。
+string并不是序列式容器，但是这里也一并讲了。
+（C++的字符串处理能力很弱，这个string类几乎感觉就是vector <char>）
+不过即便如此，用string还是会比char数组方便许多。
+要使用string类，应声明下列头文件：
+#include <string>
+
+这里需要注意区分头文件<string>和<cstring>，前者是C++ STL的字符串类，后者是C语言的字符串处理函数头文件，在C语言中声明为<string.h>
+
+- string对象的定义和初始化
+
+string s; // 产生空的deque
+
+string s(string s2); // 生成一个复制了s2的所有元素的s
+
+string s(int n); // 生成一个含有n个空元素的的string
+
+string s(int n, T e); // 生成一个含有n个值为e的元素的string
+
+string s(itr beg, itr end); //产生一个string，以区间[beg,end]为元素初值
+
+string s = "ojs";
+
+- string的大小和容量
+string提供了size()方法返回当前字符个数，并提供了max_size()方法返回所能容纳的最大字符个数。
+string和vector一样，字符个数和容量往往不一样，用capacity() 方法返回string当前容量。
+同时，string还提供了与size()方法效果相同的length() 方法。
+string的max_size同样非常大，在算法竞赛中一般不需要关心。
+- string中字符的访问
+char& s[int idx];
+
+char& s.at(int idx);
+
+char& s.front();
+
+char& s.back();
+
+- string中字符的遍历
+string支持下标遍历和迭代器遍历：
+for (int i = 0; i < s.size(); i++)
+  cout<< s[i]<< endl;
+
+string::iterator itr;
+for (itr = s.begin(); itr != s.end(); itr++)
+  cout<< *itr<< endl;
+
+- string中字符的插入
+string类提供了较为丰富的插入方法，不仅像前面的容器那样支持用迭代器指明插入位置，也支持用下标指明插入位置。
+void s.push_back(char e);
+
+string& s.append(string/char* e); //返回添加后的整个字符串;
+
+string& s.insert(int pos, string/char* e);
+
+string& s.insert(int pos, string/char* e, int n); //在pos插入e的前n个字符;
+
+string& s.insert(int pos, string/char* e, int p2, int n); //在pos插入e从p2开始的n个字符;
+
+string& s.insert(int pos, int n, char e); //在pos插入n个e;
+
+itr s.insert(itr pos, char e);
+
+itr s.insert(itr pos, int n, char e);
+
+itr s.insert(itr pos, itr beg, itr end);
+
+- string中字符的删除
+void s.clear();
+
+string& s.erase(int pos);
+
+string& s.erase(int pos, int n);
+
+itr s.erase(itr pos);
+
+itr s.erase(itr beg, itr end);
+
+
+- string中字符的查找
+string类提供了用以查找字符或子串的方法。
+可以使用方法find()进行正向查找，也可以使用方法rfind() 进行逆向查找。
+如果查找成功，返回第一个字符的下标，反之返回s.npos;
+string::npos的类型为size_type，是某个无符号的类型，将string::npos类型转换为int后值为-1。
+同样的，下列参数和返回值为方便起见用int替代size_type。
+int s.find(string/char* e);
+
+int s.find(char s);
+
+int s.find(string/char* e, int pos); //从pos开始找e;
+
+int s.find(char e, int pos);
+
+int s.find(char e, int pos, int n); //从pos开始找e的前n个;
+
+
+- string中的操作符
+string允许通过比较运算符进行字符串的字典序比较，并且允许通过+和+=操作符进行字符串的连接。
+- string中元素的拷贝
+string& s.assign(itr beg, itr end);
+
+string& s.assign(int n, char e);
+
+- string中的其他方法
+int s.compare(string s2); //字典序比较，s<s2返回负数，s=s2返回0，s>s2返回正数;
+
+int compare(int pos, int n, string/char* s);//比较当前字符串从pos开始的n个字符组成的字符串与s的大小;
+
+int compare(int pos, int n, string/char* s, int pos2, int n2); //比较当前字符串从pos开始的n个字符组成的字符串与s中;
+
+bool s.empty();
+
+string substr(int pos = 0, int n = npos); //返回pos开始的n个字符组成的字符串;
+
+
+
+
+
+
+#include<pair>
+pair
+pair模板类用来绑定两个对象为一个新的对象。
+要使用pair需要声明头文件：
+#include <utility>
+
+- pair对象的定义和初始化
+pair <T1, T2> p;
+
+pair <T1, T2> p(v1, v2);
+
+make_pair(v1, v2);
+
+pair的first和second属性(成员变量)分别为第一个和第二个的值。
+
+p1 < p2; //如果p1.first<p2.first或者!(p2.first < p1.first)&& p1.second<p2.second，则返回true
+
+p1 == p2 //p1.first == p2.first && p1.second == p2.second
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include<set>
+set/multiset
+set和multiset容器是C++ STL提供的集合类容器，不支持随机访问，通过在内部维护一种称之为“红黑树”的二叉排序树，从而使得其能达到较高的查找和删除效率。
+set和multiset的区别在于，set中相同值的元素只能存储一个，而multiset则能存储重复值的元素。
+set和multiset容器的方法相同，下面统一以set做说明。
+要使用这两个容器，需要声明头文件：
+#include <set>
+
+- set容器的声明
+template <class Key, class Traits = less<Key>, class Allocator = allocator<Key> > class set;
+
+其中参数K代表的set中元素的数据类型，Traits是用于实现集合内部排序的仿函数，如果不声明默认为less<Key>，Allocator代表集合的内存分配器，默认为allocator<Key>。
+一般在算法竞赛中，最后一个模板参数Allocator不需要考虑，第二个参数Traits用到的地方也比较少，但是在某些时候（比如Key的类型是自定义的类型）的时候，或者希望从大到小排的时候，就需要用到。
+- set对象的定义和初始化
+set <T> s;
+
+set <T> s(itr beg, itr end);
+
+set <T, functor> s(functor f);
+
+set <T, functor> s(itr functor f)
+一般来说，如果遇到简单数据类型需要降序排列的话，可以定义为：
+set <T, greater <T> > st;
+
+如果遇到结构体排序，可以用之前的重载运算符的方法，也可以给set类模板传参数：
+1.	可以传函数指针：
+bool comp(int x, int y) {return x < y;}
+typedef bool(* pass)(int, int);  
+set <int, pass> st(comp);
+2. 可以传lambda表达式：
+lambda表达式是C++ 11加入的匿名函数，在一些场合使用会更方便。
+auto func = [] (int x, int y) {return x < y;};
+set <int, decltype(func)> st(func);
+3. 可以传仿函数（函数对象）
+class comp
+{
+  public: bool operator () (int x, int y) const {return x < y;}
+};
+set <int, comp> st;
+
+- set容器的大小
+同序列式容器一样，可以通过size() 方法获取元素个数，通过max_size() 方法获取能容纳的最大元素数量。
+- set中元素的访问/查找
+set不支持随机访问，亦不支持首尾访问，但是提供了查找方法find() 进行元素查找，亦可通过迭代器访问。
+  itr s.find(T e); //如果有返回元素对应的迭代器位置，没有返回s.end();
+
+同时，set还支持一些其他的查找方法
+
+pair<itr, itr> s.equal_range(T e); //返回键值等于e的元素区间;
+
+int s.count(T e); //返回键值为e的元素的个数;
+
+itr s.upper_bound(T e); //返回大于e的第一个元素位置;
+
+itr s.lower_bound(T e); //返回大于等于e的第一个元素位置;
+
+- set中元素的遍历
+set容器可通过迭代器遍历元素
+set <int>::iterator itr;
+for (itr = s.begin(); itr != s.end(); itr++)
+  cout<< *itr<< endl;
+
+- set中元素的插入
+pair<itr, bool> s.insert(T e); //插入e。返回e的位置和是否成功插入
+
+void s.insert(itr beg, itr end);
+void s.insert(init_list l); //C++ 11标准方法
+
+- set中元素的删除
+void s.clear();
+
+int s.erase(T e); //返回删除元素的个数
+
+- set中的其他方法
+bool s.empty();
+
+- 用于set容器的函数
+•	set_union() 求两个set的并集
+•	set_intersection() 求两个set的交集
+•	set_difference() 求第一个相对于第二个的差集
+用法如下：
+s3.end() set_union(s1.begin(), s1.end(), s2.begin(), s2.end(), s3.begin());
+
+
+
+
+
+
+
+
+
+
+#include<map>
+map/multimap
+map和multimap是C++ STL提供的键值对应的集合，很多用法和set/multiset很像，这里给出一些不同点。
+使用map/multimap需要声明头文件：
+#include <map>
+
+- map容器的声明
+map <T Key, T Value, Functor Traits = less<Key>, Functor Allocator = allocator<pair<const Key, Value> > >;
+
+map中前面一个模板参数放Key(键)，也就是通过键来进行排序，然后比set多了一个Value（值），可以通过键找到值。
+- map中元素的遍历
+map的迭代器（iterator）相当于一个pair有first和second两个属性（成员变量）。
+cout<< itr->first<< " "<< itr->second<< endl;
+
+- map中元素的查找
+map中通过find()等方法返回的是迭代器，需要用itr->second获取值。
+map重载了下标运算符[]，可以通过下标下标运算符直接获取值。
+Tv a = m[Tk e];
+需要注意的是，用下标运算符通过键获取值建议只获取在map中已经存在的键对应的值。
+- map中元素的插入
+map通过insert()方法插入要使用pair
+s.insert(pair<Tk, Tv>(k, v));
+
+s.insert(make_pair(k, v));
+
+s.insert({k, v}); //C++ 11;
+
+map也可以通过下标运算符[]插入：
+m[Tk k] = v;
+
+hashmap(set)/unordered_map(set)
+前面的map和set内部是用红黑树实现的，这里的这几个容器内部用散列（哈希）表实现的，hashmap(set)并非C++标准容器，而是各编译器厂商自行实现的，而unordered_map(set)为C++ 11标准加入的标准STL容器。
+
+#include<bitset>
+bitset是一个用于存储二进制位的容器，就像bool数组一样，但是有空间优化，bitset中的一个元素一般只占1 bit，即0.125个字节。
+要使用bitset需要声明头文件：
+#include <bitset>
+
+- bitset对象的定义和声明
+bitset <int n> b; //n为二进制位数
+
+ bitset <int n> b(int num);
+ bitset <int n> b(string s); //s为字符串形式的二进制位
+
+- bitsetd的运算
+bitset可以像一个整数一样的进行各种位运算，还可以和整数进行==运算。
+bitset支持下标运算符[]的操作，能通过下标获取和修改该位的值。
+bitset也可以使用cout输出。
+- bitset的方法
+int b.size(); //返回位数
+
+int b.count(); //返回为1的位数个数
+
+bool b.any(); //返回是否有为1的位
+
+bool b.none(); //范围是否没有为1的位
+
+bitset b.set(); //全部位赋值为1
+
+bitset b.set(int p); //将p位赋值为1
+
+bitset b.set(int p, bool num); //将p位设置为num
+
+bitset b.reset(); //全部位赋值为0
+
+bitset b.reset(int p);
+
+bitset b.flip(); //全部取反
+
+bitset b.flip(int p);
+
+unsigned long b.to_ulong(); //返回为ulong，超出报错
+
+unsigned long long b.to_ullong(); //返回为ull，超出报错
+
+string b.to_string(); //返回为string
+
+
+
+#include<stack>
+stack是C++ STL提供的容器适配器：栈。
+若要使用stack，需声明头文件：
+#include <stack>
+
+- stack对象的定义和初始化
+stack <T> s;
+stack <T, Container = deque<T> > s;
+
+第二个模板参数是定义stack内部储存元素的容器，默认是deque，如果要修改，方法如下：
+
+stack <int, vector <int> > st;
+
+所有了序列式容器(vector, list, deque)都支持stack。
+- stack提供的方法
+void s.push(); //入栈
+
+void s.pop(); //出栈
+
+T s.top(); //获取栈顶元素
+
+bool s.empty();
+int s.size(); //返回栈中元素
+
+
+需要注意的是，stack没有clear() 方法，如果需要清空，需要循环出栈。
+
+
+
+
+
+
+
+
+#include<queue>
+queue是C++ STL提供的容器适配器：队列。
+若要使用queue，需声明头文件：
+#include <queue>
+
+- queue对象的定义和初始化
+queue <T> q;
+queue <T, Container = deque<T> > q;
+
+vector容器因为无法提供pop_front() 方法因而无法作为queue的内部储存容器。
+- queue提供的方法
+
+void q.push(); //入队
+
+void q.pop(); //出队
+
+T q.front(); //获取队首元素
+
+T q.back(); //获取队尾元素
+
+bool q.empty();
+int q.size(); //返回栈中元素
+
+queue同样没有提供clear() 方法，如果需要清空需循环出队。
+
+
+
+
+priority_queue
+priority_queue 是C++ STL提供的容器适配器：优先队列。
+何为优先队列？在优先队列中，元素并不是按照顺序存储在容器中的，而是按照优先级顺序存储在容器中的。即在此类队列中，被压入的元素已经按优先级顺序进行了自动排序，默认排序准则是“<”。
+优先队列和普通队列一样，使用时需要包含头文件：
+#include <queue>
+
+- priority_queue对象的定义和初始化
+
+priority_queue <T> q;
+
+priority_queue <T, Container = deque<T> > q;
+
+priority_queue <T, Container = deque<T>, Compare = less <T> > q;
+
+list容器因为无法提供随机存取迭代器因而无法作为queue的内部储存容器。
+如果需要自定义比较标准，参照set容器。
+- priority_queue提供的方法
+同queue。
+
+
+
+
+
+
+
+
+
+
+#include<algorithm>
+C++ STL提供了许多会在算法竞赛中用到的算法函数。
+要使用这些算法的函数，需要声明头文件：
+#include <algorithm>
+
+实现时会用到比较的函数一般都会提供自定义比较的方法。
+algorithm中提供的方法大体分为4类：
+•	非修改式序列算法
+•	修改式序列算法
+•	排序和相关操作
+•	通用数字运算
+sort()/stable_sort()
+sort绝对是算法竞赛中使用次数最多的STL算法库函数之一，此函数提供的基于快速排序，插入排序等排序的算法进行排序的功能，一般情况下比手写的快速排序速度还会快。
+sort(itr beg, itr end);
+
+sort(itr beg, itr end, func comp);
+
+如果是对普通数组进行排序怎么办呢？
+
+sort(&arr[i], &arr[j]);
+
+sort(arr, arr + n);
+
+一般我们对数组排序都会使用下面的做法，在这里，arr退化为数组首指针，和&arr[0]相同。
+对于sort的自定义比较，传自定义比较函数要比类模板传参要简单，如果传全局函数，可以直接传函数名：
+bool comp(int x, int y) {return x < y;}
+sort(arr, arr + n, comp);
+如果传lambda表达式，则可以直接将表达式写在参数那里：
+sort(arr, arr + n, [] (int x, int y) {return x < y;});
+stable_sort() 能保证在排序时对于比较方法相同元素的相对顺序不发生改变。
+什么叫对于比较方法相同呢，比如你自定义了一个结构体和比较函数：
+stuct node { int x, y; };
+
+bool comp(node a, node b) { return a.x < b.x };
+
+比较函数只比较了结构体中x的值，那么，比如说(node){x=1, y=1}就和(node){x=1, y=2}这两个结构体变量就对于比较函数comp相同。
+max()/min()
+max()和min()函数返回两个值中相比较大/小的元素
+T min(T a, T b);
+max_element()/min_element()
+返回序列中较大/小的元素
+T max_element(itr beg, itr end);
+
+T max_element(itr beg, itr end, func comp);
+
+reverse()/reverse_copy()
+将序列中的元素逆向顺序反转，reverse() 函数直接在源序列反转，reverse_copy() 函数将反转的结果放入一个新的序列。
+void reverse(itr beg, itr end);
+aimItrEnd reverse_copy(souItrBeg, souItrEnd, aimItrBeg);
+
+rotate()/rotate_copy()
+旋转元素
+void rotate(itr beg, itr newBeg, itr end); //将beg的元素移动到newBeg，其他位置的元素同样按照这种距离移动。
+
+aimItrEnd rotate_copy(souItrBeg, souItrNewBeg, souItrEnd, aimItrBeg);
+swap()
+交换两个元素的值。
+void swap(T a, T b);
+next_permutation()/prev_permutation()
+提供全排列算法的函数。
+next_permutation() 用于求当前排列的下一个排列（比当前排列大），而prev_permutation() 用于求当前排列的上一个排列（比当前排列小）。
+两个函数的返回值均为bool类型，对于next_permutation()，若当前排列为最大排列，返回false，反之返回true，对于prev_permutation()，若当前排列为最小排列，返回false，反之返回true。
+bool next_permutation(itr beg, itr end);
+lower_bound()/upper_bound()
+这两个函数用于实现对已排序的序列的二分查找。
+lower_bound()返回第一个大于等于给定值的元素的位置，如果没有则返回最后一个元素之后的位置。
+upper_bound()返回第一个大于给定值的元素的位置，如果没有则返回最后一个元素之后的位置。
+iter lower_bound(iter beg, iter end, T e);
+unique()/unique_copy()
+用于移除序列中重复的元素，用以保证序列中相同值的元素唯一。
+需要注意的是，unique()的移除是伪移除，只是将重复的值放在序列的末尾，返回去重之后的尾地址。
+itr unique(itr beg, itr end);
+aimItrEnd unique(souItrBeg, souItrEnd, aimItrBeg);
+count()/count_if()
+count() 函数提供了进行元素计数，即求得容器中元素的总个数的功能。另外，还提供了条件计数的函数：count_if()
+int count(itr beg, itr end, T e); //返回[beg, end]中值为e的元素的个数
+int count_if(itr beg, itr end, func comp); //返回使comp返回true的元素的个数
+find()/find_if()
+STL算法库提供了用于搜索的算法，find() 函数返回第一个和给定值相同值的元素的位置，而find_if()用于条件搜索。
+itr find(itr beg, itr end, T e);
+itr find_if(itr beg, itr end, func comp);
+
+
+
+
+
+
+
+
+
+
+#include<sstream>
+
+stringstream
+C++ STL提供了stringstream类用于进行数字和字符串之间的转换。
+（C++ 11提供了诸如to_string()之类的更方便的方法，在此不进行叙述）
+要使用stringstream类，需要包含头文件：
+#include <sstream>
+
+stringstream的对象通过«运算符读入需要转换的数字（字符串），再用»运算符输出转换完成的字符串（数字）。
+具体用法如下：
+stringstream ssr;
+int i = 100;
+string s;
+ssr << i;
+ssr >> s;
+ssr.clear();
+cout<< s<< endl;
+
+需要注意的是，stringstream在下一次使用时需要调用clear() 方法，否则会出现无法预测的输出。
+另外，stringstream类的构造效率较低，建议尽量不要频繁定义stringstream类，如果需要频繁使用，可以在更外围定义，之后每次调用前进行clear() 。
