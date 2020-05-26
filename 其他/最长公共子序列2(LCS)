@@ -1,0 +1,46 @@
+
+#include<bits/stdc++.h>  //luogu 1439
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 1e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+//只能用于两个1~n不同排列的两个序列 *nlog(n)* 求LCS
+int mp[N], a[N], b[N], dp[N];
+int main(){
+    ios::sync_with_stdio(false);
+    int n;
+    cin>>n;
+    rep2(i, 1, n+1){
+        cin>>a[i], mp[a[i]] = i;
+    }
+    rep2(i, 1, n+1){
+        cin>>b[i];
+        dp[i] = INF;
+    }
+    int len = 0;
+    dp[0] = 0;
+    rep2(i,1,n+1){
+        int l = 0, r = len;
+        if(mp[b[i]] > dp[len]){
+            dp[++len] = mp[b[i]];
+        }else{
+            while(l < r){
+                int mid = (l + r) / 2;
+                if(dp[mid] > mp[b[i]]) r = mid;
+                else l = mid+1;
+                // cout<<l<<endl;
+            }
+            dp[l] = min(mp[b[i]], dp[l]);
+        }
+    }
+    cout<<len<<endl;
+    
+    return 0;
+}
