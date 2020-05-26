@@ -1,0 +1,55 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e6 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+
+int v[N], q[N], dis[N];         //q为队列数组， dis为几率下标数组
+int main(){
+    ios::sync_with_stdio(false);
+    int n,m;
+    cin>>n>>m;
+    rep2(i, 1, n+1){
+        cin>>v[i];
+    }
+
+    //  求最小值，单调减队列
+    int head = 1, tail = 0;         //初值一定要这样赋！ tail >= head表示有元素存在
+    rep2(i, 1, n+1){
+        while(head <= tail && q[tail] >= v[i]){     //入队元素， 且保持队列单调，尾部元素与入队元素比较
+            tail--;
+        }
+        q[++tail] = v[i];       //入队，记录下标
+        dis[tail] = i;
+        while(dis[head] <= i - m){
+            head++;                     //下标超过移动窗口大小，出队
+        }
+        if(i >= m) printf("%d ", q[head]);          //队头元素必定是区间最值
+    }
+    printf("\n");
+
+
+    //求最大值, 单调增队列
+    head = 1, tail = 0;
+    rep2(i, 1, n+1){
+        while(head <= tail && q[tail] <= v[i]){
+            tail--;
+        }
+        q[++tail] = v[i];
+        dis[tail] = i;
+        while(dis[head] <= i - m){
+            head++;
+        }
+        if(i >= m) printf("%d ", q[head]);
+    }    
+    printf("\n");
+
+    return 0;
+}
