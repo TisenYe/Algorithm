@@ -57,6 +57,6 @@ int main(){
             continue;
         }
         Mat ans = ksm(mt, n - 3);
-        printf("%lld\n", (ans.a[0][2] + ans.a[1][2] + ans.a[2][2])%mod);
+        printf("%lld\n", (ans.a[0][2] + ans.a[1][2] + ans.a[2][2])%mod);    //结果矩阵每一列都对于相应的结果
     }
 }
