@@ -11,7 +11,10 @@ const ll N = 1e6 + 200;
 const ll INF = 9999999999999;
 const double eps = 1e-5;
 
-
+/*
+    扩展欧几里得，求解：ax + by = m = gcd(a, b)
+    m mod gcd(a, b) = 0,因为这个是上式有解的必要条件
+*/
 int gcd(int a, int b) {
     return !b ? a : gcd(b, a % b);
 }
