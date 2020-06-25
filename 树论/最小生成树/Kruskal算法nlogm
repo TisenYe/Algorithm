@@ -1,0 +1,73 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i < end; i++)
+#define dwn(i,n) for(int i = n; i >= 0; i--)
+#define dwn2(i,start,end) for(ll i = start; i >= end; i--)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 0x3f3f3f;
+const ll mod = 1e9 + 7;
+
+typedef struct nod{
+	int id,toid;
+	int w;
+	nod(){
+		id = toid = '\0';
+		w = 0;
+	}
+}nods;
+
+bool cmp(nods a, nods b){
+	return a.w < b.w;
+}
+
+int f[2*N];
+
+int Find(int x){
+	if (x == f[x]) return x;
+	return f[x] = Find(f[x]);
+}
+
+int main(){
+	int n,m;
+	while(~scanf("%d%d",&n,&m)&&n){
+		rep2(i,0,n+1){
+			f[i] = i;
+		}
+		nods edge[N];
+		int k = 0;
+		rep(i,m){
+			int x,y,w;
+			scanf("%d%d%d",&x,&y,&w);
+			edge[k].id = x;
+			edge[k].toid = y;
+			edge[k++].w = w;
+		}
+		sort(edge, edge+k, cmp);
+		ll sum = 0;
+		int j = 0;
+		rep(i,k){
+			int x = Find(edge[i].id);
+			int y = Find(edge[i].toid);
+			if(x == y) continue;
+			f[x] = y;
+			sum += edge[i].w;
+		}
+		printf("%lld\n",sum);
+	}
+
+
+
+	return 0;
+}
+
+
+
+
