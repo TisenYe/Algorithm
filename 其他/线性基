@@ -1,4 +1,3 @@
-
 #include<bits/stdc++.h>         //P3812 luogu
 using namespace std;
 #define ll long long
@@ -25,6 +24,36 @@ void check(ll x){
     }
 }
 
+ll haveOXR(ll x){       //查询值X能否被异或出来
+    for(int i = 62; i >= 0; i--){
+        if(!(x >> (ll)i)){
+            x ^= P[i];
+        }
+    }
+    return x==0;
+}
+
+
+ll mxOXR(){             //查询异或最大值
+    ll ans = 0;
+    for(int i = 60; i >= 0; i--){       
+        if((ans ^ P[i]) > ans){
+            ans ^= P[i];
+        }
+    }
+    return ans;
+}
+
+int have0;
+ll minOXR(){        //查询异或最小值
+    if(have0) return 0;
+    rep(i,63){
+        if(P[i]) return P[i];
+    }
+    return INF;
+}
+
+
 int main(){
     ios::sync_with_stdio(false);
     int n;
@@ -32,15 +61,10 @@ int main(){
     ll a[N] = {0};
     rep(i,n){
         cin>>a[i];
+        if(!a[i]) have0 = 1;
         check(a[i]);
     }
-    ll ans = 0;
-    for(int i = 60; i >= 0; i--){
-        if((ans ^ P[i]) > ans){
-            ans ^= P[i];
-        }
-    }
-    cout<<ans<<endl;
+    cout<<mxOXR()<<endl;
     
     return 0;
 }
