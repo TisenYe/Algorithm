@@ -1,23 +1,26 @@
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
 typedef long long ll;
 const int MAXN = 100010;
 struct Node {
     int l, r;
     ll lazy;
-    ll sum;
+    ll sum,mx,mi;
 } segTree[MAXN * 4];
 void build(int i, int l, int r) {
     segTree[i].l = l;
     segTree[i].r = r;
     if (l == r) {
         scanf("%lld", &segTree[i].sum);
+        segTree[i].mx = segTree[i].mi = segTree[i].sum;
         return;
     }
     int mid = (l + r) >> 1;
     build(i << 1, l, mid);
     build(i << 1 | 1, mid + 1, r);
     segTree[i].sum = segTree[i << 1].sum + segTree[i << 1 | 1].sum;
+    segTree[i].mx = max(segTree[i<<1].mx, segTree[i<<1|1].mx);
+    segTree[i].mi = min(segTree[i<<1].mi, segTree[i<<1|1].mi);
 }
 void push_up(int i, ll v) {
     segTree[i].sum += (segTree[i].r - segTree[i].l + 1) * v;
@@ -40,13 +43,22 @@ void add(int i, int l, int r, ll v) {
     if (mid < r) add(i << 1 | 1, l, r, v);
     segTree[i].sum = segTree[i << 1].sum + segTree[i << 1 | 1].sum;
 }
+
 ll query(int i, int l, int r) {
-    if (segTree[i].l == l && segTree[i].r == r) return segTree[i].sum;
+    if (segTree[i].l == l && segTree[i].r == r) return segTree[i].mx;
     push_down(i);
     int mid = (segTree[i].l + segTree[i].r) >> 1;
     if (r <= mid) return query(i << 1, l, r);
     else if (l > mid) return query(i << 1 | 1, l, r);
-    else return query(i << 1, l, mid) + query(i << 1 | 1, mid + 1, r);
+    else return max(query(i << 1, l, mid) , query(i << 1 | 1, mid + 1, r));
+}
+ll query_mi(int i, int l, int r) {
+    if (segTree[i].l == l && segTree[i].r == r) return segTree[i].mi;
+    push_down(i);
+    int mid = (segTree[i].l + segTree[i].r) >> 1;
+    if (r <= mid) return query_mi(i << 1, l, r);
+    else if (l > mid) return query_mi(i << 1 | 1, l, r);
+    else return min(query_mi(i << 1, l, mid) , query_mi(i << 1 | 1, mid + 1, r));
 }
 int main() {
     int n, m, op;
@@ -55,14 +67,9 @@ int main() {
     int l, r; 
 	ll v;
     while (m--) {
-        scanf("%d", &op);
-        if (op == 1) {
-            scanf("%d%d%lld", &l, &r, &v);
-            add(1, l, r, v);
-        } else {
-            scanf("%d%d", &l, &r);
-            printf("%lld\n", query(1, l, r));
-        }
+        scanf("%d%d",&l, &r);
+        // cout<<query(1,l,r)<<" "<<query_mi(1,l,r)<<endl;
+        printf("%lld\n", query(1,l,r) - query_mi(1,l,r));
     }
     return 0;
 }
