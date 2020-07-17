@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>		//洛谷P6492
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i < ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 3e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+//求区间最长01串（与相邻的不同）
+
+
+int a[N];				//a数组存放元素
+struct nod{
+	int l,r;
+	int preffix, suffix, mx;		//preffix为前缀01串，suffix为后缀01串，mx是区间最长01串
+}tree[N*4];
+
+void push_up(int i){		//更新前缀、后缀、区间最大01串
+	tree[i].preffix = tree[i << 1].preffix;
+	tree[i].suffix = tree[i << 1 | 1].suffix;
+	tree[i].mx = max(tree[i << 1].mx, tree[i << 1 | 1].mx);		//更新当前区间最长长度
+	int mid = (tree[i].l + tree[i].r) >> 1;
+	if(a[mid] != a[mid+1]){					//如果中间也不相同，能合并左右区间
+		tree[i].mx = max(tree[i].mx, (tree[i << 1].suffix + tree[i << 1 | 1].preffix));		//左子区间的后缀+右子区间的前缀可能会比当前大
+		if(tree[i << 1].preffix == (tree[i << 1].r - tree[i << 1].l + 1)){
+			tree[i].preffix += tree[i << 1 | 1].preffix;			//更新当前区间最长前缀（加上右子区间前缀）
+		}
+		if(tree[i << 1 | 1].suffix == (tree[i << 1 | 1].r - tree[i << 1 | 1].l +1)){
+			tree[i].suffix += tree[i << 1].suffix;					//更新当前区间最长后缀（加上左子区间后缀）
+		}	
+	}
+}
+
+void build(int i, int l, int r){
+	tree[i].l = l;
+	tree[i].r = r;
+	tree[i].preffix = tree[i].suffix = tree[i].mx = 1;		//初始化为1
+	if(l == r){
+		return;
+	}
+	int mid = (l + r) >> 1;
+	build(i << 1, l, mid);
+	build(i << 1 | 1, mid + 1, r);
+	push_up(i);
+}
+
+void update(int i, int l, int r, int nw){
+	if(l == r && r == nw) return;
+	int mid = (tree[i].r + tree[i].l) >> 1;
+	if(nw <= mid)update(i << 1, l, mid, nw);
+	else update(i << 1 | 1, mid + 1, r, nw);
+	push_up(i);
+}
+
+int main(){
+	ios::sync_with_stdio(false);
+	int n,q;
+	cin>>n>>q;
+	build(1, 1, n);
+	while(q--){
+		int x;
+		cin>>x;
+		a[x] ^= 1;				//更新元素
+		update(1, 1, n, x);
+		cout<<tree[1].mx<<endl;
+	}
+	
+	return 0;
+}
