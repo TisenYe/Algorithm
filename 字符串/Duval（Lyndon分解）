@@ -1,0 +1,41 @@
+#include <bits/stdc++.h> //luogu 6114模板题
+using namespace std;
+#define ll long long
+#define rep(i, n) for (int i = 0; i < n; ++i)
+#define rep2(i, st, ed) for (int i = st; i <= ed; ++i)
+#define mk(x, y) make_pair(x, y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    string s;
+    cin >> s;
+    int len = s.length();
+    int i = 0;
+    ll ans = 0;
+    while (i < len)
+    {
+        int j = i, k = i + 1;
+        while (k < len && s[j] <= s[k])  //寻找循环
+        {
+            if (s[j] < s[k])    //并入循环串
+                j = i;
+            else
+                j++; //相同，找下一个匹配循环串的字符
+            k++;
+        }
+        while (i <= j)      
+        {
+            ans ^= (i + (k - j));
+            i += k - j; //每次跳找到的循环字符串一次
+        }
+    }
+    cout << ans << endl;
+    return 0;
+}
