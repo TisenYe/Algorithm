@@ -49,7 +49,8 @@ int dfs(int u, ll flow){
         return flow;
     }
     ll used = 0;
-    for (int i = head[u]; ~i; i = edge[i].next){
+    for (int i = cur[u]; ~i; i = edge[i].next){
+        cur[u] = i;
         int v = edge[i].v;
         if(edge[i].w && dep[v] + 1 == dep[u]){
             int d = dfs(v, min(flow - used, edge[i].w));
