@@ -35,7 +35,7 @@ void bfs(){
         q.pop();
         for (int i = head[u]; ~i; i = edge[i].next){
             int v = edge[i].v;
-            if(dep[v] != -1)
+            if(dep[v] != -1)    //防止重复修改某个点
                 continue;
             q.push(v);
             dep[v] = dep[u] + 1, gap[dep[v]]++;
@@ -63,6 +63,8 @@ int dfs(int u, ll flow){
         }
     }
     --gap[dep[u]];
+
+    // gap优化，如果出现断层，无法到达t，直接而结束。
     if(!gap[dep[u]])
         dep[s] = n + 1;
     dep[u]++;
@@ -71,10 +73,10 @@ int dfs(int u, ll flow){
 }
 
 void ISAP(int s, int t){
-    bfs();
+    bfs();      //初始化标记深度
     while(dep[s] < n){
-        memcpy(cur, head, sizeof(head));
-        dfs(s, INF);
+        memcpy(cur, head, sizeof(head));    //弧优化
+        dfs(s, INF);        //寻找增广路，最多跑n-dep跳增广路
     }
 }
 
