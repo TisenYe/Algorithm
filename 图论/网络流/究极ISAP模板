@@ -1,0 +1,99 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,st,ed) for(int i = st; i <= ed; ++i)
+#define mk(x,y) make_pair(x,y)
+#define pb(x) push_back(x)
+const ll mod = 1e9 + 7;
+const ll N = 2e5 + 200;
+const int INF = 0x3f3f3f3f;
+const double eps = 1e-7;
+
+struct nod{
+    ll next, v, w;
+} edge[N<<1];
+
+int head[N], tot;
+int s, t, n, m;
+ll maxflow;
+
+void add(int u ,int v, int w = 1){
+    edge[tot].next = head[u],edge[tot].v = v,edge[tot].w = w,head[u] = tot++;
+}
+
+int dep[N], gap[N], cur[N];
+queue<ll> q;
+
+void bfs(){
+    memset(dep, -1, sizeof(dep));
+    memset(gap, 0, sizeof(gap));
+
+    q.push(t), dep[t] = 0, gap[0] = 1;
+    while(!q.empty()){
+        int u = q.front();
+        q.pop();
+        for (int i = head[u]; ~i; i = edge[i].next){
+            int v = edge[i].v;
+            if(dep[v] != -1)
+                continue;
+            q.push(v);
+            dep[v] = dep[u] + 1, gap[dep[v]]++;
+        }
+    }
+}
+
+int dfs(int u, ll flow){
+    if(u == t){
+        maxflow += flow;
+        return flow;
+    }
+    ll used = 0;
+    for (int i = head[u]; ~i; i = edge[i].next){
+        int v = edge[i].v;
+        if(edge[i].w && dep[v] + 1 == dep[u]){
+            int d = dfs(v, min(flow - used, edge[i].w));
+            if(d > 0){
+                edge[i].w -= d;
+                edge[i ^ 1].w += d;
+                used += d;
+            }
+            if(used == flow)
+                return used;
+        }
+    }
+    --gap[dep[u]];
+    if(!gap[dep[u]])
+        dep[s] = n + 1;
+    dep[u]++;
+    gap[dep[u]]++;
+    return used;
+}
+
+void ISAP(int s, int t){
+    bfs();
+    while(dep[s] < n){
+        memcpy(cur, head, sizeof(head));
+        dfs(s, INF);
+    }
+}
+
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0),cout.tie(0);
+    memset(head, -1, sizeof(head));
+    maxflow = 0;
+    cin >> n >> m >> s >> t;
+    rep(i, m)
+    {
+        ll u, v, w;
+        cin >> u >> v >> w;
+        add(u, v, w);
+        add(v,u,0);
+    }
+    ISAP(s, t);
+    cout << maxflow << endl;
+
+    return 0;
+}
