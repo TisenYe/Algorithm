@@ -1,0 +1,53 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<iostream>
+#include<string>
+#include<vector>
+#include<stack>
+#include<bitset>
+#include<cstdlib>
+#include<cmath>
+#include<set>
+#include<list>
+#include<deque>
+#include<map>
+#include<queue>
+using namespace std;
+typedef long long ll;
+const double PI = acos(-1.0);
+const double eps = 1e-6;
+const int INF = 1000000000;
+const int mod = 1e7+7;
+const int maxn = 2e5+5;
+ll dp[200][200];
+int top[200];
+ll dfs(int pos,int sum,int limit){
+	if(pos==-1) return sum;
+	if(!limit&&dp[pos][sum]!=-1) return dp[pos][sum];
+	int up = limit?top[pos]:1;
+	ll ans = 1;
+	for(int i=0;i<=up;i++){
+		ll tt =dfs(pos-1,sum+(i==1),limit&&i==top[pos]);
+		tt = max(1LL,tt);
+		ans = ans*tt%mod;
+	}
+	if(!limit) dp[pos][sum] = ans;
+	return ans ;
+}
+ll solve(ll num){
+	memset(dp,-1,sizeof(dp));
+	int pos = 0;
+	while(num){
+		top[pos++] = num&1;
+		num>>=1;
+	}
+	return dfs(pos-1,0,1);
+}
+int main() {
+	ll x,y;
+	cin>>x;
+	cout<<solve(x)<<endl;
+    return 0;
+}
+

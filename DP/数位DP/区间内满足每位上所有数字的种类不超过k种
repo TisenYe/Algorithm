@@ -1,0 +1,67 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<iostream>
+#include<string>
+#include<vector>
+#include<stack>
+#include<bitset>
+#include<cstdlib>
+#include<cmath>
+#include<set>
+#include<list>
+#include<deque>
+#include<map>
+#include<queue>
+using namespace std;
+typedef long long ll;
+const double PI = acos(-1.0);
+const double eps = 1e-6;
+const int INF = 1000000000;
+const int mod = 998244353;
+const int maxn = 2e5+5;
+pair<ll,ll>dp[20][2048];
+int top[20];
+ll pw[200];
+int k;
+pair<ll,ll> dfs(int pos,int state,int limit,int lead){
+	if(pos==-1) return{1,0};
+	if(!limit&&!lead&&dp[pos][state].second) return dp[pos][state];
+	int up = limit?top[pos]:9;
+	pair<ll,ll> ans = {0,0};
+	for(int i=0;i<=up;i++){
+		ll nsta = state|((!lead||i)<<i);
+		//int nsta = (lead&&i==0)?state:state|(1<<i);
+		if(__builtin_popcountll(nsta)<=k){
+			pair<ll,ll> tt = dfs(pos-1,nsta,limit&&i==up,lead&&i==0);
+			ans.first = (ans.first+tt.first)%mod;
+			ans.second = (ans.second+tt.second+1ll*i*pw[pos]%mod*tt.first%mod)%mod;
+		}
+	} 
+	if(!limit&&!lead) dp[pos][state] = ans;
+	return ans;
+} 
+ll solve(ll num){
+	//memset(dp,-1,sizeof(dp));
+	memset(dp,0,sizeof dp);
+	memset(top,0,sizeof top);
+	int pos=0;
+	while(num){
+		top[pos++] = num%10;
+		num/=10;
+	}
+	return dfs(pos-1,0,1,1).second;
+} 
+int main() {
+	int t;
+		ll x,y;
+		pw[0] = 1;
+		for(int i=1;i<=20;i++){
+			pw[i] = pw[i-1]*10%mod;
+		}
+		scanf("%lld%lld%lld",&x,&y,&k);
+		printf("%lld\n",(solve(y)-solve(x-1)+mod)%mod);
+	
+    return 0;
+}
+

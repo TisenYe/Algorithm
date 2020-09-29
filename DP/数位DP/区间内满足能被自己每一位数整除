@@ -1,0 +1,69 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<iostream>
+#include<string>
+#include<vector>
+#include<stack>
+#include<bitset>
+#include<cstdlib>
+#include<cmath>
+#include<set>
+#include<list>
+#include<deque>
+#include<map>
+#include<queue>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+const double PI = acos(-1.0);
+const double eps = 1e-6;
+const int INF = 1000000000;
+const int mod = 1e9+7;
+const int maxn = 2e5+5;
+ll dp[25][2600][100];
+int top[205];
+int a[3000];
+ll gcd(ll a,ll b){
+    if(b==0) return a;
+    return gcd(b,a%b);
+}
+ll dfs(int pos,ll add,ll pre,int limit){
+	if(pos==-1){
+		return add%pre==0;
+	}
+	if(!limit&&dp[pos][add][a[pre]]!=-1) return dp[pos][add][a[pre]];
+	int up = limit?top[pos]:9;
+	ll ans = 0;
+	for(int i=0;i<=up;i++){
+		ans+= dfs(pos-1,(add*10LL+i)%2520,(i!=0?i*pre/gcd(i,pre):pre),limit&&i==up);
+	} 
+	if(!limit) dp[pos][add][a[pre]] = ans;
+	return ans ;
+}
+ll solve(ll num){
+	int pos = 0;
+	while(num){
+		top[pos++] = num%10;
+		num/=10;
+	}
+	
+	return dfs(pos-1,0,1,1);
+} 
+int main() {
+	int T;
+	memset(dp,-1,sizeof(dp));
+    scanf("%d",&T);
+    int tol = 0;
+    for(int i=1;i<=2520;i++){
+    	if(2520%i==0) a[i] = tol++;
+	}
+    while(T--) {
+		ll x,y;
+		cin>>x>>y;
+		cout<<solve(y)-solve(x-1)<<endl;
+    }
+    return 0;
+}
+
+
