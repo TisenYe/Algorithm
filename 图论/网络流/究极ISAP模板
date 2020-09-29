@@ -20,6 +20,7 @@ ll maxflow;
 
 void add(int u ,int v, int w = 1){
     edge[tot].next = head[u],edge[tot].v = v,edge[tot].w = w,head[u] = tot++;
+    edge[tot].next = head[v],edge[tot].v = u,edge[tot].w = 0,head[v] = tot++;
 }
 
 int dep[N], gap[N], cur[N];
@@ -93,7 +94,6 @@ int main()
         ll u, v, w;
         cin >> u >> v >> w;
         add(u, v, w);
-        add(v,u,0);
     }
     ISAP(s, t);
     cout << maxflow << endl;
