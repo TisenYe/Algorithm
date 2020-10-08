@@ -1,0 +1,80 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i <= end; i++)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 4e5 + 200;
+const ll INF = 9999999999;
+const ll mod = 1e9 + 7;
+
+
+struct nod
+{
+    int next, v;
+    ll w;   
+}edge[N];
+ll tot = 0;
+int head[N];
+void add(int u, int v, int w = 1){
+    edge[tot].next = head[u], edge[tot].w = w, edge[tot].v = v, head[u] = tot++;
+}
+
+ll ans;
+ll dp[N], dis[N];
+void dfs(int u, int fa){
+    for(int i = head[u]; ~i; i = edge[i].next){
+        
+        ll v = edge[i].v;
+        if(fa == v) continue;
+        dis[v] = dis[u] + 1;
+        dfs(v, u);
+        ans = max(ans, dp[u] + dp[v] + edge[i].w);
+        dp[u] = max(dp[u], dp[v] + edge[i].w);
+    }
+}
+int main(){
+    std::ios::sync_with_stdio(false);
+    cin.tie(0),cout.tie(0);
+    ll t;
+    cin>>t;
+    while(t--){
+        tot = 0, ans = 0;
+        ll n,a,b,da,db;
+        cin>>n>>a>>b>>da>>db;
+        rep2(i,1,n){
+            dp[i] = dis[i] = 0;
+            head[i] = -1;
+        }
+        rep( z,n-1){
+            ll u,v;
+            cin>>u>>v;
+            add(u,v);
+            add(v,u);
+        }
+        dfs(a,-1);
+        int flag = 0;
+        if(2*da >= db){
+            flag = 1;
+        }
+        if(2*da >= ans){
+            flag = 1;
+        }
+        if(dis[b] <= da){
+            flag = 1;
+        }
+        if(flag){
+            cout<<"Alice\n";
+        }else{
+            cout<<"Bob\n";
+        }
+    }
+
+
+    return 0;
+}
+
+
+
