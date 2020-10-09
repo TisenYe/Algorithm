@@ -1,4 +1,4 @@
-#include<bits/stdc++.h>     //O(n^2m)
+#include<bits/stdc++.h>     //O(n^2m),二分图下为O(m*sqrit(n))
 using namespace std;
 #define ll long long
 #define rep(i,n) for(int i = 0; i < n; ++i)
