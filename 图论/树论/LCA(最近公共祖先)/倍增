@@ -1,55 +1,53 @@
-#include<queue>
-#include<iostream>
-#include<cmath>
+#include<bits/stdc++.h>
 using namespace std;
 #define ll long long
 #define rep(i,n) for(ll i = 0; i < n; i++)
-#define rep2(i,start,end) for(ll i = start; i < end; i++)
-#define dwn(i,n) for(int i = n; i >= 0; i--)
-#define dwn2(i,start,end) for(ll i = start; i >= end; i--)
+#define rep2(i,start,end) for(ll i = start; i <= end; i++)
 #define pll pair<ll,ll>
 #define mk(x,y) make_pair(x,y)
 #define pdl pair<double, ll>
 const ll N = 6e5 + 300;
-const ll INF = 0x3f3f3f;
+const ll INF = 9999999999;
 const ll mod = 1e9 + 7;
-typedef struct{
-	int to,val,next;
-}nod;
-nod edge[2*N];
+
+
+struct nod
+{
+	int next,v;	
+}edge[N<<1];
 int head[N];
-int d[N];	//表示深度depth 
-int tot,root;
-int f[N][22],lg[N];		//f数组表示倍增的父节点，lg为跳跃最大距离 
+int d[N];			//d数组记录深度
+int tot;
+int f[N][22], lg[N];		//f数组记录倍增的父节点，lg为跳跃最大距离
+
+void add(int u, int v){
+	edge[tot].next = head[u], edge[tot].v = v, head[u] = tot++;
+	edge[tot].next = head[v], edge[tot].v = u, head[v] = tot++;
+}
+
 void init(int n){
-	rep2(i,0,n+2){
-		head[i] = 0;
-		d[i] = 0;
+	for(int i = 0; i <= n+1; i++){
+		head[i] = -1, d[i] = 0;
 	}
 	tot = 0;
 }
 
-void add(int x, int y){
-	edge[++tot].next = head[x];
-	edge[tot].to = y;
-	head[x] = tot;
-}
-
-void dfs(int x, int fath){
-	d[x] = d[fath] + 1;
-	f[x][0] = fath;
+void dfs(int x, int fa){
+	d[x] = d[fa]+1;
+	f[x][0] = fa;
 	for(int i = 1; (1<<i) <= d[x]; i++){
 		f[x][i] = f[f[x][i-1]][i-1];
 	}
-	for(int i = head[x]; i; i = edge[i].next){
-		if(edge[i].to != fath){
-			dfs(edge[i].to, x);
+	for(int i = head[x]; ~i; i = edge[i].next){
+		int v = edge[i].v;
+		if(v != fa){
+			dfs(v, x);
 		}
 	}
 }
 
 int LCA(int x, int y){
-	if(d[x] < d[y]) swap(x,y);
+	if(d[x] < d[y]) swap(x, y);
 	while(d[x] > d[y]){
 		x = f[x][lg[d[x] - d[y]] - 1];
 	}
@@ -63,32 +61,31 @@ int LCA(int x, int y){
 	return f[x][0];
 }
 
+
 int main(){
-		int n,m;
-		cin>>n>>m>>root;
-		init(n);
-		rep(i,n-1){
-			int x,y;
-			cin>>x>>y;
-			add(x,y);
-			add(y,x);
-		}
-		dfs(root, 0);
-		for(int i = 1; i <= n; i++){		//常数优化 
-			lg[i] = lg[i-1] + (1<<lg[i-1] == i);
-		}
-//		rep2(i,1,n+1){
-//			cout<<d[i]<<" ";
-//		}
-//		cout<<endl;
-		rep(i,m){
-			int x,y;
-			scanf("%d%d",&x,&y);
-			printf("%d\n", LCA(x,y));
-		}
+    std::ios::sync_with_stdio(false);
+    cin.tie(0),cout.tie(0);
+    int n,m,root;
+    cin>>n>>m>>root;
+    init(n);
+    ll x,y;
+    rep(i,n-1){
+    	cin>>x>>y;
+    	add(x,y);
+    }
+    dfs(root, 0);
+    for(int i = 1; i <= n; i++){
+    	lg[i] = lg[i-1] + (1<<lg[i-1] == i);
+    }
+    while(m--){
+    	ll a,b;
+    	cin>>a>>b;
+    	cout<<LCA(a,b)<<endl;
+    }
+
+
 	return 0;
 }
-
 
 
 
