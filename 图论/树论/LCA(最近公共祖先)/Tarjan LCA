@@ -1,0 +1,109 @@
+#include<bits/stdc++.h>        //O(n+q),离线
+using namespace std;
+#define ll long long
+#define rep(i,n) for(ll i = 0; i < n; i++)
+#define rep2(i,start,end) for(ll i = start; i <= end; i++)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 5e5 + 300;
+const ll INF = 9999999999;
+const ll mod = 1e9 + 7;
+
+
+
+struct nod
+{
+    int next,v; 
+}edge[N<<1];            //连边
+struct nod2
+{
+    int next, id, v;
+    int flag = 0;   
+}query[N<<1];           //保存询问
+int head[N], headq[N];
+int vis[N];
+int tot, tot2;
+int par[N], lca[N];         //lca数组储存询问的答案
+
+//路径压缩
+int root(int v) {return par[v] < 0 ? v : (par[v] = root(par[v]));}
+
+void Union(int a, int b){
+    a = root(a);
+    b = root(b);
+    par[b] = a;
+}
+
+void add(int u, int v){
+    edge[tot].next = head[u], edge[tot].v = v, head[u] = tot++;
+    edge[tot].next = head[v], edge[tot].v = u, head[v] = tot++;
+}
+
+void add_query(int u, int v, int id){
+    query[tot2].next = headq[u], query[tot2].v = v, query[tot2].id = id, headq[u] = tot2++;
+    query[tot2].next = headq[v], query[tot2].v = u, query[tot2].id = id, headq[v] = tot2++;
+
+}
+
+void init(int n){
+    for(int i = 0; i <= n; i++){
+        par[i] = headq[i] = head[i] = -1;
+    }
+    tot2 = tot = 0;
+} 
+
+
+
+
+void Tarjan(int x, int fa){
+    
+    for(int i = head[x]; ~i; i = edge[i].next){
+        int v = edge[i].v;
+        //合并没有访问过的子节点
+        if(v != fa && !vis[v]){
+            Tarjan(v, x);
+            Union(x, v);
+            vis[v] = 1;
+        }
+    }
+
+    for(int i = headq[x]; ~i; i = query[i].next){
+        int v = query[i].v;
+        //如果询问包含已经访问过的节点，表示存在其祖先，更新答案
+        if(!query[i].flag && vis[v]){
+            lca[query[i].id] = root(v);
+            query[i].flag = 1;
+            query[i^1].flag = 1;
+        }
+    }
+
+}
+
+
+int main(){
+    std::ios::sync_with_stdio(false);
+    cin.tie(0),cout.tie(0);
+    int n,m,root;
+    cin>>n>>m>>root;
+    init(n);
+    ll x,y;
+    rep(i,n-1){
+        cin>>x>>y;
+        add(x,y);
+    }
+    rep(i,m){
+        ll a,b;
+        cin>>a>>b;
+        add_query(a, b, i);
+    }
+    Tarjan(root, 0);
+    rep(i,m){
+        cout<<lca[i]<<'\n';
+    }
+
+    return 0;
+}
+
+
+
