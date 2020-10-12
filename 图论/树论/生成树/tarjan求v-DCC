@@ -1,0 +1,123 @@
+#include<bits/stdc++.h>
+#include<vector>
+#include<iostream>
+#include<algorithm>
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define rep2(i,start,end) for(int i = start; i < end; i++)
+#define ll long long
+#define mk(x,y) make_pair(x,y);
+#define pb(x) push_back(x);
+using namespace std;
+const ll N = 5e5+200;
+const ll mod = 998244353;
+
+typedef struct{
+	int to,next;
+}edges;
+edges edge[2*N];
+int head[N],dfn[N],low[N],stk[N],cut[N];
+int tot,top,root,num,cnt;
+vector<int> dcc[N];
+//vector<int>obj;
+
+void init(){
+	memset(head, 0, sizeof(head));
+	tot = 0;
+}
+
+void add(int x, int y){
+//	cout<<x<<" "<<y<<endl;
+	edge[++tot].to = y,edge[tot].next = head[x], head[x] = tot;
+}
+
+void tarjan(int x){
+	dfn[x] = low[x] = ++num;
+	stk[++top] = x;
+	if(x == root && head[x] == 0){
+		dcc[++cnt].push_back(x);
+//		cout<<"yes"<<endl<<x<<endl; 
+		return;
+	}
+	int flag = 0;
+	for(int i = head[x]; i; i = edge[i].next){
+		int y = edge[i].to;
+		if(!dfn[y]){
+			tarjan(y);
+			low[x] = min(low[x], low[y]);
+			if(low[y] >= dfn[x]){
+				flag++;
+				if(x != root || flag > 1) cut[x] = 1;
+				cnt++;
+				int z;
+				do{
+					z = stk[top--];
+//					cout<<"stk: "<<z<<" "<<cnt<<endl;
+					dcc[cnt].push_back(z);
+				}while(z != y);
+//				cout<<"stk: "<<x<<" "<<cnt<<endl;
+				dcc[cnt].push_back(x);
+			}
+		}else low[x] = min(low[x],dfn[y]);
+//		cout<<"k: "<<cnt<<endl;
+//		for(int k = 1; k <= cnt; k++){
+//			printf("%d, ",k);
+//			int len = dcc[cnt].size();
+//			cout<<len<<":  ";
+//			for(int j = 0; j < len; j++){
+//				printf("%d ",dcc[k][j]);
+//			}
+//			printf("\n");
+//		}
+	}
+}
+
+void start_tarjan(int n){
+	num = 0;
+	cnt = 0;
+	memset(dfn,0,sizeof(dfn));
+	memset(cut,0,sizeof(cut));
+	for(int i = 0; i <= n; i++){
+		dcc[i].clear();
+	}
+	top = 0;
+	rep2(i,1,n+1){
+		if(!dfn[i]) root = i, tarjan(i);
+	}
+}
+
+int main(){
+	int n,m;
+	while(~scanf("%d%d",&n,&m)){
+		init();
+		int x,y;
+		rep(i,m){
+			scanf("%d%d",&x,&y);
+			if(x == y) continue;
+			add(x,y);
+			add(y,x);
+		}
+		start_tarjan(n);
+		ll rst = 1;
+		if(n == 1){
+			cout<<0<<endl;
+			return 0;
+		}
+		for(int i = 1; i <= cnt; i++){
+//			printf("%d: ",i);
+			int len = dcc[i].size();
+			if(len > 2){
+				rst *= (pow(2,len) - 1);
+			}else if(len == 2){
+				rst *= 2;
+			}
+			rst %= mod;
+//			cout<<len<<":  ";
+//			for(int j = 0; j < len; j++){
+//				printf("%d ",dcc[i][j]);
+//			}
+//			printf("\n");
+		}
+		rst %= mod;
+		cout<<rst<<endl;
+	}
+}
