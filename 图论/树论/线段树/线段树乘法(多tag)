@@ -1,0 +1,125 @@
+#include<bits/stdc++.h>         //先乘后加，多tag
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define rep2(i, st, ed) for(int i = st, i < ed; i++) 
+const int N = 1e5 + 200;
+
+
+int mod = 1e9 + 7;
+
+struct Node{
+    int l, r;
+    ll multag = 1, addtag, lazz;
+    ll sum;
+}segTree[N*4];
+
+void build(int i, int l, int r){
+    segTree[i].l = l;
+    segTree[i].r = r;
+    segTree[i].multag = 1;
+    segTree[i].addtag = 0;
+    if(l == r){
+        scanf("%lld", &segTree[i].sum);
+        return;
+    }
+    int mid = (l + r) >> 1;
+    build(i << 1, l, mid);
+    build(i << 1 | 1, mid + 1, r);
+    segTree[i].sum = segTree[i << 1].sum + segTree[i << 1 | 1].sum;
+    segTree[i].sum %= mod;
+}
+
+//区间加法push操作
+void push_up_add(int i, ll v){
+    segTree[i].sum += (segTree[i].r - segTree[i].l + 1) * v;
+    segTree[i].sum %= mod;
+    segTree[i].addtag = (segTree[i].addtag + v) % mod;
+}
+
+//区间乘法push操作
+void push_up_mul(int i, ll v){
+    segTree[i].sum *= v;
+    segTree[i].sum %= mod;
+    segTree[i].multag = (segTree[i].multag * v) % mod;
+    segTree[i].addtag = (segTree[i].addtag * v) % mod;
+}
+
+void push_up(int i, ll mul, ll add){
+    segTree[i].sum = (segTree[i].sum * mul + (segTree[i].r - segTree[i].l + 1) * add) % mod;
+    segTree[i].multag *= mul;
+    segTree[i].multag %= mod;
+    segTree[i].addtag = segTree[i].addtag * mul + add;
+    segTree[i].addtag %= mod;
+}
+void push_down(int i){
+    if(segTree[i].l == segTree[i].r) return;
+    push_up(i << 1, segTree[i].multag, segTree[i].addtag);
+    push_up(i << 1 | 1, segTree[i].multag, segTree[i].addtag);
+    segTree[i].addtag = 0;
+    segTree[i].multag = 1;
+}
+
+void add(int i, int l, int r, ll v){
+    if(segTree[i].l >= l && segTree[i].r <= r){
+        push_up_add(i, v);
+        return;
+    }
+    push_down(i);
+    int mid = (segTree[i].l + segTree[i].r) >> 1;
+    if(mid >= l) add(i << 1, l, r, v);
+    if(mid < r) add(i << 1 | 1, l , r, v);
+    segTree[i].sum = segTree[i << 1].sum + segTree[i << 1 | 1].sum;
+    segTree[i].sum %= mod;
+}
+
+void mul(int i, int l, int r, ll v){
+    if(segTree[i].l >= l && segTree[i].r <= r){
+        push_up_mul(i,v);
+        return;
+    }
+    push_down(i);
+    int mid = (segTree[i].l + segTree[i].r) >> 1;
+    if(mid >= l) mul(i << 1, l, r, v);
+    if(mid < r) mul(i << 1 | 1, l, r, v);
+    segTree[i].sum = segTree[i << 1].sum + segTree[i << 1 | 1].sum;
+    segTree[i].sum %= mod;
+}
+
+ll query(int i, int l, int r){
+    if(segTree[i].l == l && segTree[i].r == r)  return segTree[i].sum;
+    push_down(i);
+    int mid = (segTree[i].l + segTree[i].r) >> 1;
+    if(r <= mid) return query(i << 1, l , r) % mod;
+    else if(l > mid) return query(i << 1 | 1, l, r) % mod;
+    else return (query(i << 1, l, mid) + query(i << 1 | 1, mid + 1, r)) % mod;
+}
+
+
+
+int main(){
+    int n,m,op;
+    scanf("%d%d%d", &n, &m, &mod);
+    build(1,1,n);
+    while(m--){
+        scanf("%d", &op);
+        if(op == 2){
+            int l,r;
+            ll x;
+            scanf("%d%d%lld", &l, &r, &x);
+            add(1, l, r, x);
+        }else if(op == 1){
+            int l,r;
+            ll x;
+            scanf("%d%d%lld", &l, &r, &x);
+            mul(1, l, r, x);
+        }else if(op == 3){
+            int l,r;
+            scanf("%d%d", &l, &r);
+            ll tmp = query(1,l,r);
+            cout<<tmp<<"\n";
+        }
+    }
+
+    return 0;
+}
