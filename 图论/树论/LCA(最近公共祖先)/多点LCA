@@ -1,0 +1,111 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int i = 0; i < n; ++i)
+#define rep2(i,start,end) for(ll i = start; i < end; ++i)
+#define dwn(i,n) for(int i = n; i >= 0; --i)
+#define dwn2(i,start,end) for(ll i = start; i >= end; --i)
+#define pll pair<ll,ll>
+#define mk(x,y) make_pair(x,y)
+#define pdl pair<double, ll>
+const ll N = 1e5 + 10;
+const int INF = 1e9;
+const ll mod = 1e9 + 7;
+
+
+int n, m;
+int lst[N], to[2*N], pre[2*N];
+int rst[2*N];
+int depth[2*N];
+int st[N];
+int tot;
+int nb;
+int tree[8 * N];
+
+void add( int u, int v ) {
+    pre[tot] = lst[u];
+    lst[u] = tot;
+    to[tot] = v;
+    tot += 1;
+}
+
+void dfs( int x = 0, int p = -1, int d = 0 ){
+    depth[nb] = d;
+    rst[nb++] = x;
+    for(int i = lst[x]; i+1; i = pre[i]){
+        int y = to[i];
+        if(y != p) {
+            dfs(y, x, d+1);
+            depth[nb] = d;
+            rst[nb++] = x;
+        }
+    }
+}
+
+void build( int p = 1, int l = 0, int r = n+n-1 ){
+    if(l == r) tree[p] = l;
+    else {
+        int M = (l + r) / 2;
+        build(p+p, l, M);
+        build(p+p+1, M+1, r);
+        if(depth[ tree[p+p] ] < depth[ tree[p+p+1] ])
+            tree[p] = tree[p+p];
+        else
+            tree[p] = tree[p+p+1];
+    }
+}
+
+int LCA( int i, int j, int p = 1, int l = 0, int r = n+n-1 ){
+    if(j < l || i > r) return INF;
+    if(l >= i && r <= j) return tree[p];
+    int M = (l + r) / 2;
+    int a, b;
+    a = LCA(i, j, p+p, l, M);
+    b = LCA(i, j, p+p+1, M+1, r);
+    if(a == INF) return b;
+    if(b == INF) return a;
+    if(depth[a] < depth[b])
+        return a;
+    return b;
+}
+
+int main() {
+	int t;
+    cin>>t;
+    while(t--){
+        scanf("%d",&n);
+        tot = 0;
+        memset(lst, -1, sizeof(lst));
+        memset(st, -1, sizeof(st));
+        int x,y;
+        for(int i = 0; i < n-1; i++) {
+            scanf("%d %d", &x, &y);
+            add(x, y);
+            add(y, x);
+        }
+        nb = 0;
+        dfs();
+        for(int i = 0; i < n+n-1; i++)
+            if(st[ rst[i] ] == -1)
+                st[ rst[i] ] = i;
+        build();
+        set<int> S;
+        scanf("%d", &m);
+        while( m-- ) {
+            char s;
+            getchar();
+            scanf("%c %d",&s, &x);      //S存储公共节点
+            if(s == '+') S.insert(st[x]);
+            else S.erase( S.find(st[x]) );
+            if(S.empty()){
+                printf("-1\n");
+                continue;
+            }
+            int l, r;
+            l = *S.begin();
+            r = *S.rbegin();
+            printf("%d\n", rst[LCA(l, r)]);
+        }
+    }
+    return 0;
+}
