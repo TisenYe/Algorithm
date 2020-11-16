@@ -6,6 +6,47 @@ void merge(int x, int y ){
     par[x] += par[y];
     par[y] = x;
 }
-int main(){
-    memset(par,-1,sizeof(par));
-}
+
+
+
+
+struct UnionFind{
+	vector<ll> par;		//父元素
+	vector<ll> size;	//集合数量
+
+	UnionFind(int n){	//初始化
+		cl.resize(n);
+		rep(i,n){
+			par.push_back(i);
+			size.push_back(1);
+		}
+	}
+	
+	ll root(ll x){		//查找集合代表元素，路径压索
+		return par[x] == x ? x : par[x] = root(par[x]);
+	}
+
+	void unite(ll x, ll y){		//合并
+		x = root(x), y = root(y);
+		if(x == y) return;
+		if(x < y) swap(x,y);
+		par[x] = y;
+		for(auto e: cl[x]){
+			cl[y][e.first] += e.second;
+		}
+		ll resize = size[x] + size[y];
+		size[x] = resize;
+		size[y] = resize;
+	}
+
+	bool same(ll x, ll y){
+		x = root(x);
+		y = root(y);
+		return x == y;
+	}
+
+	ll getSize(ll x){
+		x = root(x);
+		return size[x];
+	}
+};
