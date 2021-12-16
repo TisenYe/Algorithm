@@ -12,6 +12,7 @@ const double eps = 1e-7;
 
 
 string Manacher(string s){
+    //将字符串补成奇数长度
     string t = "$#";
     ll n = s.length();
     rep(i,n){
@@ -19,20 +20,35 @@ string Manacher(string s){
         t += '#';
     } 
     n = t.length();
-    vector<int> p(n);               //p数组记录当前为最大回文子串
+
+    //p数组记录当前位置为回文中心的最大回文子串长度
+    vector<int> p(n);               
+
+    //id为当前位置，mx为当前位的最长回文的右端点位置
+    //resLen为最长回文长度，resCenter为最长回文中心位置
     int mx = 0, id = 0, resLen = 0, resCenter = 0;
+
     for(int i = 1; i < n; i++){
+        //mx > i时i位置包括在上一个位置最长回文的长度内
+        //此时必有j也包括在上一个位置的最长回文的长度内(由于对称性)
+        //且 j + i = 2 * id, 所以此时的p[i]可以取到p[j]的长度
+        //但是不能超过上次最长回文的右端点
         p[i] = mx > i ? min(p[2 * id - i], mx - i) : 1;
+
+        
         while(t[i + p[i]] == t[i - p[i]]) ++p[i];
         if(mx < i + p[i]){
             mx = i + p[i];
             id = i;
         }
+
         if(resLen < p[i]){
-            resLen = p[i];              //resLen 为最长回文子串长度
+            resLen = p[i];
             resCenter = i;
         }
     }
+
+    //( (i - p[i]) / 2 ) 为原字符串的左端点位置
     return s.substr((resCenter - resLen) / 2, resLen - 1);
 }
 int main(){
