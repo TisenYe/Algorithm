@@ -1,0 +1,22 @@
+string  mult(string rst, string b){
+    int a[N] = {0};                   //N为最大长度
+    int len1 = b.size();
+    int len2 = rst.size(); 
+    for(int i = len1 - 1; i >= 0; i--){
+        for(int j = len2 -1; j >= 0; j--){
+            int p = (len1-1-i) + (len2-1-j);
+            a[p] += (b[i] - '0') * (rst[j] - '0');
+            a[p+1] += a[p]/10;
+            a[p] %= 10;
+        }
+    }
+    rst = "";
+    int flag = 0;
+    for(int i = len1*len2; i >= 0; i--){
+        if(a[i] != 0 || flag){
+            rst += ('0' + a[i]);
+            flag = 1;
+        }
+    }
+    return rst;
+}
